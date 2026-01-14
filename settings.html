@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AMETHYST • Settings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%}
+
+body{
+  font-family:Inter,system-ui,sans-serif;
+  background:radial-gradient(circle at top,#2e1065,#020006 70%);
+  color:#f5f3ff;
+  overflow:auto;
+}
+
+/* CONTAINER */
+.settings-wrap{
+  max-width:900px;
+  margin:40px auto;
+  padding:0 22px 60px;
+}
+
+/* TITLE */
+h1{
+  text-align:center;
+  font-size:32px;
+  letter-spacing:.5em;
+  margin-bottom:30px;
+  text-shadow:0 0 40px #c084fc;
+}
+
+/* SECTION */
+.section{
+  background:rgba(18,6,38,.75);
+  backdrop-filter:blur(22px);
+  border-radius:22px;
+  padding:22px 22px 18px;
+  margin-bottom:26px;
+  box-shadow:
+    inset 0 0 40px rgba(192,132,252,.18),
+    0 35px 90px rgba(0,0,0,.6);
+}
+
+.section-title{
+  font-size:12px;
+  letter-spacing:.45em;
+  color:#d8b4fe;
+  margin-bottom:18px;
+}
+
+/* ROW */
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  padding:10px 0;
+}
+
+.label{
+  font-size:14px;
+  opacity:.85;
+}
+
+/* TOGGLE */
+.toggle{
+  position:relative;
+  width:54px;
+  height:28px;
+}
+.toggle input{display:none}
+.slider{
+  position:absolute;
+  inset:0;
+  border-radius:999px;
+  background:#140027;
+  box-shadow:inset 0 0 18px rgba(192,132,252,.35);
+  cursor:pointer;
+  transition:.25s;
+}
+.slider::before{
+  content:"";
+  position:absolute;
+  width:22px;height:22px;
+  left:3px;top:3px;
+  border-radius:50%;
+  background:#c084fc;
+  box-shadow:0 0 18px #c084fc;
+  transition:.25s;
+}
+.toggle input:checked + .slider{
+  background:#7c3aed;
+}
+.toggle input:checked + .slider::before{
+  transform:translateX(26px);
+}
+
+/* SELECT / RANGE */
+select,input[type=range]{
+  background:#140027;
+  border:none;
+  color:#f5f3ff;
+  border-radius:999px;
+  padding:8px 14px;
+  box-shadow:inset 0 0 18px rgba(192,132,252,.35);
+  outline:none;
+}
+
+/* BUTTON */
+.btn{
+  background:linear-gradient(90deg,#c084fc,#7c3aed);
+  border:none;
+  padding:10px 18px;
+  border-radius:999px;
+  font-weight:800;
+  letter-spacing:.2em;
+  font-size:11px;
+  cursor:pointer;
+  box-shadow:0 0 25px rgba(192,132,252,.6);
+}
+.btn.danger{
+  background:#ef4444;
+  box-shadow:0 0 25px rgba(239,68,68,.6);
+}
+
+/* FOOTER */
+.footer-note{
+  text-align:center;
+  opacity:.6;
+  font-size:12px;
+  margin-top:30px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="settings-wrap">
+  <h1>SETTINGS</h1>
+
+  <!-- UI -->
+  <div class="section">
+    <div class="section-title">UI & VISUALS</div>
+
+    <div class="row">
+      <div class="label">Enable Glow Effects</div>
+      <label class="toggle">
+        <input type="checkbox" data-setting="glow" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="row">
+      <div class="label">Crystal Cursor</div>
+      <label class="toggle">
+        <input type="checkbox" data-setting="cursor" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="row">
+      <div class="label">Theme</div>
+      <select data-setting="theme">
+        <option value="amethyst">Amethyst</option>
+        <option value="dark">Void Dark</option>
+        <option value="nebula">Nebula Purple</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- MOTION -->
+  <div class="section">
+    <div class="section-title">MOTION & EFFECTS</div>
+
+    <div class="row">
+      <div class="label">Animations</div>
+      <label class="toggle">
+        <input type="checkbox" data-setting="animations" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="row">
+      <div class="label">Particle Density</div>
+      <input type="range" min="0" max="100" value="60" data-setting="particles">
+    </div>
+  </div>
+
+  <!-- PERFORMANCE -->
+  <div class="section">
+    <div class="section-title">PERFORMANCE</div>
+
+    <div class="row">
+      <div class="label">Low Power Mode</div>
+      <label class="toggle">
+        <input type="checkbox" data-setting="lowPower">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="row">
+      <div class="label">Reduce Blur</div>
+      <label class="toggle">
+        <input type="checkbox" data-setting="reduceBlur">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- WINDOWS -->
+  <div class="section">
+    <div class="section-title">WINDOW BEHAVIOR</div>
+
+    <div class="row">
+      <div class="label">Open Apps Maximized</div>
+      <label class="toggle">
+        <input type="checkbox" data-setting="autoMax">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="row">
+      <div class="label">Smooth Window Drag</div>
+      <label class="toggle">
+        <input type="checkbox" data-setting="smoothDrag" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- FUN -->
+  <div class="section">
+    <div class="section-title">FUN & EXTRAS</div>
+
+    <div class="row">
+      <div class="label">Crystal Hover Sounds</div>
+      <label class="toggle">
+        <input type="checkbox" data-setting="sounds">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="row">
+      <div class="label">Easter Eggs</div>
+      <label class="toggle">
+        <input type="checkbox" data-setting="eggs" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- RESET -->
+  <div class="section">
+    <div class="section-title">RESET</div>
+
+    <div class="row">
+      <button class="btn danger" onclick="resetSettings()">RESET ALL SETTINGS</button>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    Amethyst OS • settings saved locally
+  </div>
+</div>
+
+<script>
+/* LOAD SETTINGS */
+document.querySelectorAll("[data-setting]").forEach(el=>{
+  const key = "amethyst_"+el.dataset.setting;
+  const saved = localStorage.getItem(key);
+
+  if(el.type === "checkbox"){
+    el.checked = saved !== null ? saved === "true" : el.checked;
+    el.onchange = ()=>localStorage.setItem(key, el.checked);
+  }else{
+    if(saved !== null) el.value = saved;
+    el.onchange = ()=>localStorage.setItem(key, el.value);
+  }
+});
+
+/* RESET */
+function resetSettings(){
+  if(!confirm("Reset all Amethyst settings?")) return;
+  Object.keys(localStorage)
+    .filter(k=>k.startsWith("amethyst_"))
+    .forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+</script>
+
+</body>
+</html>

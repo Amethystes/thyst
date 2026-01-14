@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AMETHYST • Prism</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      /* === AMETHYST ONLY THEME === */
+      --bg0:#050112;
+      --bg1:#08021b;
+      --bg2:#120433;
+
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+
+      --amethyst:#c88bff;
+      --amethyst2:#a86cff;
+      --amethyst3:#8c4cff;
+
+      --glassA: rgba(255,255,255,.12);
+      --glassB: rgba(255,255,255,.07);
+
+      --blur: 18px;
+      --sat: 185%;
+      --radius: 22px;
+
+      --mx: 50vw;
+      --my: 50vh;
+
+      --ease: cubic-bezier(.18,.98,.22,1);
+      --speed: 260ms;
+
+      /* tweakables (settings) */
+      --gridOpacity: .45;
+      --colorBoost: 1;
+      --cursorGlow: .85;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ height:100%; }
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      overflow:hidden;
+      background:
+        radial-gradient(980px 650px at 20% 84%, rgba(200,139,255, calc(.42 * var(--colorBoost))), transparent 62%),
+        radial-gradient(900px 600px at 78% 26%, rgba(168,108,255, calc(.24 * var(--colorBoost))), transparent 62%),
+        radial-gradient(1000px 650px at 55% 12%, rgba(140,76,255, calc(.18 * var(--colorBoost))), transparent 66%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 55%, var(--bg2));
+    }
+
+    /* ===== Prism Grid Background ===== */
+    .grid{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity: var(--gridOpacity);
+      background:
+        repeating-linear-gradient(
+          to right,
+          rgba(255,255,255,.10) 0px,
+          rgba(255,255,255,.10) 1px,
+          transparent 1px,
+          transparent 72px
+        ),
+        repeating-linear-gradient(
+          to bottom,
+          rgba(255,255,255,.10) 0px,
+          rgba(255,255,255,.10) 1px,
+          transparent 1px,
+          transparent 72px
+        );
+      mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,.95), rgba(0,0,0,.55) 55%, rgba(0,0,0,0) 78%);
+    }
+    .grid::after{
+      content:"";
+      position:absolute; inset:0;
+      opacity:.34;
+      background:
+        radial-gradient(1200px 700px at 50% 45%, rgba(200,139,255, calc(.30 * var(--colorBoost))), transparent 65%),
+        radial-gradient(1000px 600px at 72% 35%, rgba(168,108,255, calc(.22 * var(--colorBoost))), transparent 70%),
+        radial-gradient(1000px 700px at 35% 70%, rgba(140,76,255, calc(.18 * var(--colorBoost))), transparent 70%);
+      filter: blur(16px) saturate(165%);
+    }
+
+    /* cursor glow */
+    .cursorGlow{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity: var(--cursorGlow);
+      background:
+        radial-gradient(380px 380px at var(--mx) var(--my), rgba(200,139,255,.30), transparent 60%),
+        radial-gradient(560px 560px at var(--mx) var(--my), rgba(168,108,255,.18), transparent 70%);
+      filter: blur(10px) saturate(190%);
+      transition: opacity var(--speed) ease;
+    }
+
+    /* film grain */
+    .grain{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.10;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      background-size: 240px 240px;
+    }
+
+    /* ===== vapor-ish button ===== */
+    .hamburger{
+      position:fixed;
+      top: 18px;
+      left: 18px;
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.07));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 18px 48px rgba(0,0,0,.38), 0 0 46px rgba(200,139,255,.16);
+      cursor:pointer;
+      z-index: 90;
+      display:grid;
+      place-items:center;
+      transition: transform 220ms var(--ease), border-color 220ms var(--ease), background 220ms var(--ease);
+      user-select:none;
+      overflow:hidden;
+    }
+    .hamburger::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background: conic-gradient(from 120deg,
+        rgba(200,139,255,.42),
+        rgba(168,108,255,.26),
+        rgba(140,76,255,.22),
+        rgba(200,139,255,.42)
+      );
+      filter: blur(18px);
+      opacity:.60;
+      transition: opacity 220ms var(--ease);
+      pointer-events:none;
+    }
+    .hamburger:hover{
+      transform: translateY(-1px) scale(1.02);
+      border-color: rgba(200,139,255,.38);
+      background: linear-gradient(180deg, rgba(200,139,255,.18), rgba(255,255,255,.07));
+    }
+    .hamburger:hover::before{ opacity:.80; }
+
+    .hamburger .lines{
+      width: 20px; height: 14px;
+      display:flex; flex-direction:column; justify-content:space-between;
+      position:relative;
+      z-index:2;
+    }
+    .hamburger .lines span{
+      height: 2px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 0 18px rgba(200,139,255,.22);
+      transition: transform 260ms var(--ease), opacity 260ms var(--ease), width 260ms var(--ease);
+      transform-origin: left center;
+    }
+    body.menuOpen .hamburger .lines span:nth-child(1){
+      transform: translateY(6px) rotate(45deg);
+      width: 22px;
+    }
+    body.menuOpen .hamburger .lines span:nth-child(2){
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+    body.menuOpen .hamburger .lines span:nth-child(3){
+      transform: translateY(-6px) rotate(-45deg);
+      width: 22px;
+    }
+
+    /* ===== Prism stage ===== */
+    .stage{
+      position:relative;
+      height:100%;
+      width:100%;
+      padding: 16px;
+    }
+
+    .topBar{
+      position:absolute;
+      left: 50%;
+      top: 18px;
+      transform: translateX(-50%);
+      width: min(560px, 74vw);
+      height: 52px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.12);
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 18px 48px rgba(0,0,0,.26), 0 0 54px rgba(200,139,255,.12);
+      z-index: 10;
+      display:flex;
+      align-items:center;
+      padding: 0 14px;
+      gap: 10px;
+      opacity: 0;
+      transform-origin: 50% 0%;
+      animation: popInTop 560ms var(--ease) forwards;
+      animation-delay: 80ms;
+    }
+    .topBar .pillDot{
+      width: 10px; height: 10px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.40);
+      box-shadow: 0 0 24px rgba(200,139,255,.34);
+      flex: 0 0 auto;
+    }
+    .topBar input{
+      flex:1;
+      height: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: rgba(255,255,255,.92);
+      font-size: 13px;
+      letter-spacing: .2px;
+    }
+    .topBar input::placeholder{ color: rgba(255,255,255,.60); }
+    .topBar .goBtn{
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      color: rgba(255,255,255,.86);
+      cursor:pointer;
+      transition: transform 220ms var(--ease), background 220ms var(--ease), border-color 220ms var(--ease);
+      user-select:none;
+    }
+    .topBar .goBtn:hover{
+      transform: translateY(-1px);
+      border-color: rgba(200,139,255,.34);
+      background: rgba(200,139,255,.12);
+    }
+
+    .rightPanel{
+      position:absolute;
+      right: 18px;
+      top: 84px;
+      width: 170px;
+      height: calc(100vh - 120px);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.12);
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 26px 70px rgba(0,0,0,.35), 0 0 80px rgba(200,139,255,.12);
+      z-index: 10;
+      opacity: 0;
+      transform: translateY(10px) scale(.98);
+      animation: popInPanel 640ms var(--ease) forwards;
+      animation-delay: 130ms;
+    }
+
+    /* center title (wave per letter) */
+    .centerTitle{
+      position:absolute;
+      inset: 0;
+      display:grid;
+      place-items:center;
+      z-index: 5;
+      text-align:center;
+      pointer-events:none;
+    }
+    .centerTitle h1{
+      font-size: clamp(74px, 10vw, 160px);
+      letter-spacing: -2px;
+      font-weight: 900;
+      color: rgba(255,255,255,.46);
+      text-shadow:
+        0 0 38px rgba(200,139,255,.16),
+        0 0 90px rgba(200,139,255,.10);
+      opacity: 0;
+      transform: translateY(18px) scale(.96);
+      filter: blur(10px);
+      animation: titleIn 720ms var(--ease) forwards 160ms;
+      white-space: nowrap;
+    }
+    .wave span{
+      display:inline-block;
+      will-change: transform;
+      animation: wave 1.55s ease-in-out infinite;
+      animation-delay: calc(var(--i) * 70ms);
+    }
+    @keyframes wave{
+      0%,100%{ transform: translateY(0px); }
+      50%{ transform: translateY(-14px); }
+    }
+
+    /* clickable bottom info */
+    .bottomInfo{
+      position:absolute;
+      left: 50%;
+      bottom: 56px;
+      transform: translateX(-50%);
+      display:flex;
+      align-items:center;
+      gap: 14px;
+      color: rgba(255,255,255,.46);
+      font-size: 13px;
+      letter-spacing: .4px;
+      opacity: 0;
+      animation: softIn 560ms ease forwards;
+      animation-delay: 260ms;
+      z-index: 20;
+    }
+    .sep{ opacity:.30; }
+    .sunIcon{ width: 16px; height: 16px; opacity:.80; display:inline-block; }
+
+    .clicky{
+      pointer-events:auto;
+      cursor:pointer;
+      user-select:none;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+      transition: transform 220ms var(--ease), background 220ms var(--ease), border-color 220ms var(--ease);
+    }
+    .clicky:hover{
+      transform: translateY(-1px);
+      border-color: rgba(200,139,255,.30);
+      background: rgba(255,255,255,.06);
+    }
+
+    .bottomLinks{
+      position:absolute;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      display:flex;
+      align-items:center;
+      gap: 14px;
+      color: rgba(255,255,255,.44);
+      font-size: 13px;
+      opacity: 0;
+      animation: softIn 560ms ease forwards;
+      animation-delay: 310ms;
+      z-index: 20;
+      pointer-events:auto;
+    }
+    .bottomLinks b{ color: rgba(255,255,255,.62); font-weight:800; }
+    .linkPill{
+      display:flex; align-items:center; gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.12);
+      box-shadow: 0 16px 40px rgba(0,0,0,.18);
+      cursor:pointer;
+      user-select:none;
+      transition: transform 220ms var(--ease), background 220ms var(--ease), border-color 220ms var(--ease);
+    }
+    .linkPill:hover{
+      transform: translateY(-1px);
+      border-color: rgba(200,139,255,.30);
+      background: rgba(200,139,255,.10);
+    }
+    .discordDot{
+      width: 12px; height: 12px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, rgba(200,139,255,.95), rgba(168,108,255,.55), rgba(140,76,255,.45));
+      box-shadow: 0 0 20px rgba(200,139,255,.30);
+    }
+
+    @keyframes popInTop{
+      0%   { opacity:0; transform: translateX(-50%) translateY(10px) scale(.98); filter: blur(10px); }
+      70%  { opacity:1; transform: translateX(-50%) translateY(-2px) scale(1.01); filter: blur(0px); }
+      100% { opacity:1; transform: translateX(-50%) translateY(0px) scale(1); filter: blur(0px); }
+    }
+    @keyframes popInPanel{
+      0%   { opacity:0; transform: translateY(10px) scale(.98); filter: blur(10px); }
+      70%  { opacity:1; transform: translateY(-2px) scale(1.01); filter: blur(0px); }
+      100% { opacity:1; transform: translateY(0px) scale(1); filter: blur(0px); }
+    }
+    @keyframes titleIn{
+      0%   { opacity:0; transform: translateY(18px) scale(.96); filter: blur(10px); }
+      65%  { opacity:1; transform: translateY(-2px) scale(1.01); filter: blur(0px); }
+      100% { opacity:1; transform: translateY(0px) scale(1); filter: blur(0px); }
+    }
+    @keyframes softIn{
+      from{ opacity:0; transform: translateX(-50%) translateY(10px); filter: blur(8px); }
+      to  { opacity:1; transform: translateX(-50%) translateY(0px); filter: blur(0px); }
+    }
+
+    /* ===== drawer ===== */
+    .scrim{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 220ms var(--ease);
+      z-index: 70;
+    }
+    .drawer{
+      position:fixed;
+      top: 14px;
+      left: 14px;
+      width: 320px;
+      height: calc(100vh - 28px);
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.06));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 28px 90px rgba(0,0,0,.55), 0 0 90px rgba(200,139,255,.12);
+      transform: translateX(-112%) scale(.98);
+      opacity: 0;
+      transition: transform 260ms var(--ease), opacity 220ms var(--ease);
+      z-index: 75;
+      overflow:hidden;
+    }
+    .drawer::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background: conic-gradient(from 120deg,
+        rgba(200,139,255,.26),
+        rgba(168,108,255,.16),
+        rgba(140,76,255,.14),
+        rgba(200,139,255,.26)
+      );
+      filter: blur(22px);
+      opacity:.60;
+      pointer-events:none;
+    }
+    body.menuOpen .scrim{ opacity:1; pointer-events:auto; }
+    body.menuOpen .drawer{ transform: translateX(0) scale(1); opacity: 1; }
+
+    .drawerInner{
+      position:relative;
+      height:100%;
+      padding: 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+    .drawerTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .brand{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .brand strong{ font-size: 13px; letter-spacing:.2px; }
+    .brand span{ font-size: 12px; color: rgba(255,255,255,.68); }
+
+    .close{
+      height: 36px;
+      padding: 0 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      color: rgba(255,255,255,.88);
+      cursor:pointer;
+      transition: transform 220ms var(--ease), border-color 220ms var(--ease), background 220ms var(--ease);
+      user-select:none;
+    }
+    .close:hover{
+      transform: translateY(-1px);
+      border-color: rgba(200,139,255,.32);
+      background: rgba(200,139,255,.12);
+    }
+
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      padding-top: 6px;
+    }
+    .navItem{
+      height: 54px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 0 12px;
+      cursor:pointer;
+
+      opacity:0;
+      transform: translateY(12px) scale(.985);
+      filter: blur(8px);
+    }
+    body.menuOpen .navItem{ animation: navIn 420ms var(--ease) forwards; }
+    body.menuOpen .navItem:nth-child(1){ animation-delay: 70ms; }
+    body.menuOpen .navItem:nth-child(2){ animation-delay: 115ms; }
+    body.menuOpen .navItem:nth-child(3){ animation-delay: 160ms; }
+    body.menuOpen .navItem:nth-child(4){ animation-delay: 205ms; }
+
+    .navItem.active{
+      border-color: rgba(200,139,255,.34);
+      background: rgba(255,255,255,.06);
+    }
+    @keyframes navIn{ to{ opacity:1; transform: translateY(0) scale(1); filter: blur(0); } }
+
+    .navItem:hover{
+      border-color: rgba(200,139,255,.30);
+      background: rgba(255,255,255,.06);
+    }
+    .navLeft{ display:flex; align-items:center; gap: 10px; font-size: 13px; }
+    .dot{
+      width: 10px; height: 10px;
+      border-radius: 99px;
+      background: linear-gradient(135deg, rgba(200,139,255,.95), rgba(168,108,255,.55), rgba(140,76,255,.45));
+      box-shadow: 0 0 20px rgba(200,139,255,.30);
+    }
+    .chev{ opacity:.65; }
+
+    .drawerFoot{
+      margin-top:auto;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.62);
+      font-size: 12px;
+      line-height: 1.35;
+      padding: 0 10px 6px;
+    }
+
+    /* ===== Pages (browser/settings only) ===== */
+    .pageHost{
+      position:fixed;
+      inset:0;
+      z-index: 30;
+      pointer-events:none;
+      display:grid;
+      place-items:center;
+      padding: 96px 16px 96px 16px;
+    }
+    .page{
+      width: min(980px, 92vw);
+      max-height: min(720px, 70vh);
+      pointer-events:auto;
+
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.10);
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 28px 90px rgba(0,0,0,.55), 0 0 90px rgba(200,139,255,.12);
+
+      overflow:hidden;
+      display:none;
+      opacity:0;
+      transform: translateY(10px) scale(.985);
+      filter: blur(10px);
+    }
+    .page.show{
+      display:block;
+      animation: pageIn 520ms var(--ease) forwards;
+    }
+    @keyframes pageIn{
+      to{ opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    .pageTop{
+      height: 54px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+    }
+    .pageTop strong{ font-size: 13px; letter-spacing:.2px; }
+    .pageTop .mini{
+      display:flex; gap:10px; align-items:center;
+      color: rgba(255,255,255,.62);
+      font-size: 12px;
+    }
+    .pageBody{
+      padding: 14px;
+      overflow:auto;
+      max-height: calc(min(720px, 70vh) - 54px);
+    }
+    .pageBody::-webkit-scrollbar{ width: 12px; }
+    .pageBody::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,.10);
+      border: 3px solid rgba(0,0,0,0);
+      background-clip: padding-box;
+      border-radius: 999px;
+    }
+
+    /* small vapor-like modal */
+    .miniModalScrim{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.25);
+      display:none;
+      z-index: 110;
+    }
+    .miniModalScrim.show{ display:block; }
+    .miniModal{
+      position:fixed;
+      left: 50%;
+      bottom: 92px;
+      transform: translateX(-50%);
+      width: min(520px, 92vw);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.10);
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 26px 80px rgba(0,0,0,.55);
+      padding: 14px;
+      display:none;
+      z-index: 111;
+      opacity:0;
+      transform-origin: 50% 100%;
+    }
+    .miniModal.show{
+      display:block;
+      animation: modalIn 420ms var(--ease) forwards;
+    }
+    @keyframes modalIn{
+      0%{ opacity:0; transform: translateX(-50%) translateY(10px) scale(.985); filter: blur(10px); }
+      100%{ opacity:1; transform: translateX(-50%) translateY(0) scale(1); filter: blur(0); }
+    }
+
+    .mRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 10px 4px;
+      border-top: 1px solid rgba(255,255,255,.10);
+    }
+    .mRow:first-child{ border-top:none; padding-top: 0; }
+    .mRow .left{ display:flex; flex-direction:column; gap: 3px; }
+    .mRow .left strong{ font-size: 12px; }
+    .mRow .left span{ font-size: 12px; color: rgba(255,255,255,.64); }
+
+    .toggle{
+      width: 54px; height: 32px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.14);
+      position:relative;
+      cursor:pointer;
+      transition: background 220ms var(--ease), border-color 220ms var(--ease);
+      flex: 0 0 auto;
+      user-select:none;
+    }
+    .toggle::after{
+      content:"";
+      width: 24px; height: 24px;
+      border-radius: 999px;
+      position:absolute; top: 50%; left: 4px;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,.22);
+      box-shadow: 0 10px 18px rgba(0,0,0,.25);
+      transition: left 220ms var(--ease), background 220ms var(--ease);
+    }
+    .toggle.on{
+      background: rgba(200,139,255,.18);
+      border-color: rgba(200,139,255,.32);
+    }
+    .toggle.on::after{ left: 26px; background: rgba(255,255,255,.32); }
+
+    .slider{ width: 220px; accent-color: var(--amethyst); }
+
+    /* reduced motion */
+    body.reduced .wave span{ animation: none !important; transform:none !important; }
+    body.reduced *{
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    @media (max-width: 740px){
+      .rightPanel{ display:none; }
+      .topBar{ width: min(520px, 82vw); }
+      .drawer{ width: min(92vw, 340px); }
+      .page{ max-height: min(720px, 76vh); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="grid"></div>
+  <div class="cursorGlow"></div>
+  <div class="grain"></div>
+
+  <!-- button -->
+  <button class="hamburger" id="menuBtn" aria-label="Open menu" title="Menu">
+    <div class="lines" aria-hidden="true">
+      <span></span><span></span><span></span>
+    </div>
+  </button>
+
+  <!-- drawer -->
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" aria-label="Sidebar">
+    <div class="drawerInner">
+      <div class="drawerTop">
+        <div class="brand">
+          <strong>AMETHYST</strong>
+          <span>amethyst prism</span>
+        </div>
+        <button class="close" id="closeBtn">Close</button>
+      </div>
+
+      <div class="nav">
+        <div class="navItem active" data-page="home"><div class="navLeft"><span class="dot"></span> Home</div><div class="chev">›</div></div>
+        <!-- Games now goes to g.html -->
+        <div class="navItem" id="gamesLink"><div class="navLeft"><span class="dot"></span> Games</div><div class="chev">›</div></div>
+        <div class="navItem" data-page="browser"><div class="navLeft"><span class="dot"></span> Browser</div><div class="chev">›</div></div>
+        <div class="navItem" data-page="settings"><div class="navLeft"><span class="dot"></span> Settings</div><div class="chev">›</div></div>
+      </div>
+
+      <div class="drawerFoot">
+        Games redirects to <b>g.html</b>.
+        <br/>ESC closes menu and popups.
+      </div>
+    </div>
+  </aside>
+
+  <!-- stage -->
+  <div class="stage">
+    <div class="topBar" aria-label="Top bar">
+      <div class="pillDot"></div>
+      <input id="topInput" placeholder="Search / enter URL..." />
+      <button class="goBtn" id="topGo">Go</button>
+    </div>
+
+    <div class="rightPanel" aria-label="Right panel"></div>
+
+    <div class="centerTitle">
+      <!-- Will be converted into wave letters by JS -->
+      <h1 id="mainTitle">AMETHYST</h1>
+    </div>
+
+    <div class="bottomInfo" aria-label="Time and weather">
+      <div class="clicky" id="clockBtn" title="Click to customize time">
+        <span id="clock">4:27:17 PM</span>
+      </div>
+      <span class="sep">|</span>
+      <div class="clicky" id="tempBtn" title="Click to customize temperature" style="display:flex; align-items:center; gap:8px;">
+        <svg class="sunIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" stroke="rgba(255,255,255,.75)" stroke-width="1.6"/>
+          <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.4 4.4l1.8 1.8M17.8 17.8l1.8 1.8M19.6 4.4l-1.8 1.8M6.2 17.8l-1.8 1.8"
+                stroke="rgba(255,255,255,.62)" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <span id="temp">20°F</span>
+      </div>
+    </div>
+
+    <div class="bottomLinks" aria-label="Version links">
+      <span>v<span id="ver">1.0.0</span> <b>Beta!</b></span>
+      <span class="sep">|</span>
+      <div class="linkPill" id="discordBtn" title="Click to open Discord link">
+        <span class="discordDot"></span> Discord
+      </div>
+    </div>
+  </div>
+
+  <!-- pages overlay (browser + settings) -->
+  <div class="pageHost" aria-label="Pages">
+    <section class="page" id="page-browser">
+      <div class="pageTop">
+        <strong>Browser</strong>
+        <div class="mini">Enter a URL → open</div>
+      </div>
+      <div class="pageBody">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <input id="urlInput" placeholder="https://example.com"
+            style="flex:1; min-width:240px; height:44px; border-radius:16px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.12); color:rgba(255,255,255,.9); padding:0 14px; outline:none;">
+          <button id="openUrl"
+            style="height:44px; padding:0 14px; border-radius:16px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.08); color:rgba(255,255,255,.9); cursor:pointer;">
+            Open
+          </button>
+        </div>
+        <div style="margin-top:12px; color:rgba(255,255,255,.66); font-size:12px; line-height:1.4;">
+          Some sites block iframes. If it doesn’t load, try another site.
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-settings">
+      <div class="pageTop">
+        <strong>Settings</strong>
+        <div class="mini">Amethyst controls</div>
+      </div>
+      <div class="pageBody">
+        <div class="mRow">
+          <div class="left">
+            <strong>Reduce Motion</strong>
+            <span>Disables wave + most animations.</span>
+          </div>
+          <div class="toggle" id="tglMotion"></div>
+        </div>
+
+        <div class="mRow">
+          <div class="left">
+            <strong>Color Boost</strong>
+            <span>Brighter amethyst glow.</span>
+          </div>
+          <input class="slider" id="sColor" type="range" min="0.6" max="1.8" step="0.05" />
+        </div>
+
+        <div class="mRow">
+          <div class="left">
+            <strong>Grid Opacity</strong>
+            <span>How visible the grid is.</span>
+          </div>
+          <input class="slider" id="sGrid" type="range" min="0.15" max="0.80" step="0.05" />
+        </div>
+
+        <div class="mRow">
+          <div class="left">
+            <strong>Cursor Glow</strong>
+            <span>Glow strength behind cursor.</span>
+          </div>
+          <input class="slider" id="sGlow" type="range" min="0" max="1.2" step="0.05" />
+        </div>
+
+        <div class="mRow">
+          <div class="left">
+            <strong>Discord Link</strong>
+            <span>Where the Discord pill sends you.</span>
+          </div>
+          <input id="discordInput" placeholder="https://discord.gg/yourcode"
+            style="width:260px; max-width:55vw; height:40px; border-radius:14px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.12); color:rgba(255,255,255,.9); padding:0 12px; outline:none;">
+        </div>
+
+        <div class="mRow">
+          <div class="left">
+            <strong>Reset</strong>
+            <span>Restore defaults.</span>
+          </div>
+          <button id="resetBtn"
+            style="height:40px; padding:0 12px; border-radius:14px; border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.08); color:rgba(255,255,255,.9); cursor:pointer;">
+            Reset
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- time/temp modal -->
+  <div class="miniModalScrim" id="miniScrim"></div>
+  <div class="miniModal" id="timeModal" aria-label="Time settings">
+    <div class="mRow">
+      <div class="left">
+        <strong>24-hour Time</strong>
+        <span>Switch between 12h and 24h.</span>
+      </div>
+      <div class="toggle" id="tgl24"></div>
+    </div>
+    <div class="mRow">
+      <div class="left">
+        <strong>Show Seconds</strong>
+        <span>Show / hide seconds.</span>
+      </div>
+      <div class="toggle" id="tglSec"></div>
+    </div>
+    <div class="mRow">
+      <div class="left">
+        <strong>Temperature</strong>
+        <span>Set custom temp.</span>
+      </div>
+      <input id="tempInput" placeholder="20°F"
+        style="width:140px; height:40px; border-radius:14px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.12); color:rgba(255,255,255,.9); padding:0 12px; outline:none;">
+    </div>
+    <div class="mRow">
+      <div class="left">
+        <strong>Done</strong>
+        <span>Close this popup.</span>
+      </div>
+      <button id="timeDone"
+        style="height:40px; padding:0 12px; border-radius:14px; border:1px solid rgba(255,255,255,.14); background:rgba(200,139,255,.14); color:rgba(255,255,255,.92); cursor:pointer;">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /* =========================
+       Cursor glow follow
+    ========================= */
+    const root = document.documentElement;
+    let raf = 0, nx = innerWidth/2, ny = innerHeight/2;
+    function schedule(){
+      if (raf) return;
+      raf = requestAnimationFrame(()=>{
+        raf = 0;
+        root.style.setProperty("--mx", nx + "px");
+        root.style.setProperty("--my", ny + "px");
+      });
+    }
+    addEventListener("mousemove", (e)=>{ nx=e.clientX; ny=e.clientY; schedule(); }, {passive:true});
+    addEventListener("touchmove", (e)=>{ nx=e.touches[0].clientX; ny=e.touches[0].clientY; schedule(); }, {passive:true});
+
+    /* =========================
+       Wave title per letter
+    ========================= */
+    const mainTitle = document.getElementById("mainTitle");
+    function makeWave(el){
+      const text = (el.textContent || "").trim();
+      el.textContent = "";
+      el.classList.add("wave");
+      [...text].forEach((ch, i)=>{
+        const s = document.createElement("span");
+        s.style.setProperty("--i", i);
+        s.textContent = ch === " " ? "\u00A0" : ch;
+        el.appendChild(s);
+      });
+    }
+    makeWave(mainTitle);
+
+    /* =========================
+       Menu open/close
+    ========================= */
+    const menuBtn = document.getElementById("menuBtn");
+    const scrim = document.getElementById("scrim");
+    const closeBtn = document.getElementById("closeBtn");
+    const drawer = document.getElementById("drawer");
+
+    function openMenu(){ document.body.classList.add("menuOpen"); }
+    function closeMenu(){ document.body.classList.remove("menuOpen"); }
+    function toggleMenu(){
+      document.body.classList.contains("menuOpen") ? closeMenu() : openMenu();
+    }
+
+    menuBtn.addEventListener("click", toggleMenu);
+    scrim.addEventListener("click", closeMenu);
+    closeBtn.addEventListener("click", closeMenu);
+
+    // vapor-ish hover open (desktop)
+    menuBtn.addEventListener("mouseenter", ()=> openMenu());
+    drawer.addEventListener("mouseleave", ()=> closeMenu());
+
+    /* =========================
+       Games link -> g.html
+    ========================= */
+    const gamesLink = document.getElementById("gamesLink");
+    gamesLink.addEventListener("click", ()=>{
+      window.location.href = "g.html";
+    });
+
+    /* =========================
+       Pages navigation (browser/settings)
+    ========================= */
+    const navItems = [...document.querySelectorAll(".navItem[data-page]")];
+    const pages = {
+      home: null,
+      browser: document.getElementById("page-browser"),
+      settings: document.getElementById("page-settings"),
+    };
+    let currentPage = "home";
+
+    function setActiveNav(key){
+      navItems.forEach(n => n.classList.toggle("active", n.dataset.page === key));
+    }
+    function hideAllPages(){
+      Object.values(pages).forEach(p => { if(p) p.classList.remove("show"); });
+    }
+    function showPage(key){
+      currentPage = key;
+      hideAllPages();
+      setActiveNav(key);
+      if (key !== "home" && pages[key]) pages[key].classList.add("show");
+    }
+
+    navItems.forEach(item=>{
+      item.addEventListener("click", ()=>{
+        showPage(item.dataset.page);
+        closeMenu();
+      });
+    });
+
+    showPage("home");
+
+    /* =========================
+       Top bar Go
+    ========================= */
+    const topInput = document.getElementById("topInput");
+    const topGo = document.getElementById("topGo");
+    topGo.addEventListener("click", ()=>{
+      const v = (topInput.value || "").trim();
+      if(!v) return;
+      window.open(normalizeUrl(v), "_blank", "noopener,noreferrer");
+    });
+    topInput.addEventListener("keydown", (e)=>{
+      if (e.key === "Enter") topGo.click();
+    });
+
+    /* =========================
+       Browser page open
+    ========================= */
+    const urlInput = document.getElementById("urlInput");
+    const openUrl = document.getElementById("openUrl");
+    openUrl.addEventListener("click", ()=>{
+      const v = (urlInput.value || "").trim();
+      if(!v) return;
+      window.open(normalizeUrl(v), "_blank", "noopener,noreferrer");
+    });
+    urlInput.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter") openUrl.click();
+    });
+
+    /* =========================
+       Clickable time modal
+    ========================= */
+    const clockEl = document.getElementById("clock");
+    const tempEl = document.getElementById("temp");
+    const clockBtn = document.getElementById("clockBtn");
+    const tempBtn = document.getElementById("tempBtn");
+
+    const miniScrim = document.getElementById("miniScrim");
+    const timeModal = document.getElementById("timeModal");
+    const timeDone = document.getElementById("timeDone");
+    const tgl24 = document.getElementById("tgl24");
+    const tglSec = document.getElementById("tglSec");
+    const tempInput = document.getElementById("tempInput");
+
+    const STORE = "amethyst_prism_v4";
+    const defaults = {
+      use24: false,
+      seconds: true,
+      temp: "20°F",
+      reduceMotion: false,
+      colorBoost: 1,
+      gridOpacity: 0.45,
+      cursorGlow: 0.85,
+      discordUrl: ""
+    };
+    const state = load();
+
+    function setToggle(el, on){ el.classList.toggle("on", !!on); }
+
+    function openTimeModal(){
+      syncTimeUI();
+      miniScrim.classList.add("show");
+      timeModal.classList.add("show");
+    }
+    function closeTimeModal(){
+      miniScrim.classList.remove("show");
+      timeModal.classList.remove("show");
+      save();
+    }
+
+    clockBtn.addEventListener("click", openTimeModal);
+    tempBtn.addEventListener("click", openTimeModal);
+    miniScrim.addEventListener("click", closeTimeModal);
+    timeDone.addEventListener("click", closeTimeModal);
+
+    tgl24.addEventListener("click", ()=>{
+      state.use24 = !state.use24;
+      setToggle(tgl24, state.use24);
+      tick(); save();
+    });
+    tglSec.addEventListener("click", ()=>{
+      state.seconds = !state.seconds;
+      setToggle(tglSec, state.seconds);
+      tick(); save();
+    });
+    tempInput.addEventListener("input", ()=>{
+      const v = tempInput.value.trim();
+      state.temp = v ? v : defaults.temp;
+      tempEl.textContent = state.temp;
+      save();
+    });
+
+    function syncTimeUI(){
+      setToggle(tgl24, state.use24);
+      setToggle(tglSec, state.seconds);
+      tempInput.value = state.temp || defaults.temp;
+    }
+
+    function tick(){
+      const d = new Date();
+      const str = d.toLocaleTimeString([], state.seconds
+        ? {hour:"numeric", minute:"2-digit", second:"2-digit", hour12: !state.use24}
+        : {hour:"numeric", minute:"2-digit", hour12: !state.use24}
+      );
+      clockEl.textContent = str;
+      tempEl.textContent = state.temp || defaults.temp;
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    /* =========================
+       Settings wiring
+    ========================= */
+    const tglMotion = document.getElementById("tglMotion");
+    const sColor = document.getElementById("sColor");
+    const sGrid = document.getElementById("sGrid");
+    const sGlow = document.getElementById("sGlow");
+    const resetBtn = document.getElementById("resetBtn");
+    const discordBtn = document.getElementById("discordBtn");
+    const discordInput = document.getElementById("discordInput");
+
+    function applySettings(){
+      document.body.classList.toggle("reduced", !!state.reduceMotion);
+      root.style.setProperty("--colorBoost", String(state.colorBoost));
+      root.style.setProperty("--gridOpacity", String(state.gridOpacity));
+      root.style.setProperty("--cursorGlow", String(state.cursorGlow));
+    }
+
+    setToggle(tglMotion, state.reduceMotion);
+    sColor.value = state.colorBoost;
+    sGrid.value = state.gridOpacity;
+    sGlow.value = state.cursorGlow;
+    discordInput.value = state.discordUrl || "";
+    applySettings();
+
+    tglMotion.addEventListener("click", ()=>{
+      state.reduceMotion = !state.reduceMotion;
+      setToggle(tglMotion, state.reduceMotion);
+      applySettings(); save();
+    });
+    sColor.addEventListener("input", ()=>{ state.colorBoost = Number(sColor.value); applySettings(); save(); });
+    sGrid.addEventListener("input", ()=>{ state.gridOpacity = Number(sGrid.value); applySettings(); save(); });
+    sGlow.addEventListener("input", ()=>{ state.cursorGlow = Number(sGlow.value); applySettings(); save(); });
+
+    discordInput.addEventListener("input", ()=>{
+      state.discordUrl = discordInput.value.trim();
+      save();
+    });
+    discordBtn.addEventListener("click", ()=>{
+      const url = (state.discordUrl || "").trim();
+      if (!url) { showPage("settings"); return; }
+      window.open(url, "_blank", "noopener,noreferrer");
+    });
+
+    resetBtn.addEventListener("click", ()=>{
+      Object.assign(state, structuredClone(defaults));
+      save();
+      setToggle(tglMotion, state.reduceMotion);
+      sColor.value = state.colorBoost;
+      sGrid.value = state.gridOpacity;
+      sGlow.value = state.cursorGlow;
+      discordInput.value = state.discordUrl || "";
+      applySettings();
+      tick();
+    });
+
+    /* =========================
+       Keyboard
+    ========================= */
+    addEventListener("keydown", (e)=>{
+      if (e.key === "Escape"){
+        closeMenu();
+        closeTimeModal();
+      }
+    });
+
+    /* =========================
+       Storage helpers
+    ========================= */
+    function normalizeUrl(v){ return /^https?:\/\//i.test(v) ? v : ("https://" + v); }
+    function load(){
+      try{
+        const raw = localStorage.getItem(STORE);
+        if(!raw) return structuredClone(defaults);
+        return {...structuredClone(defaults), ...JSON.parse(raw)};
+      }catch{
+        return structuredClone(defaults);
+      }
+    }
+    function save(){
+      try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch{}
+    }
+  </script>
+</body>
+</html>

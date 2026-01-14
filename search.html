@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AMETHYST</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+    background:radial-gradient(circle at top,#1b003a,#05000f 70%);
+    font-family:Inter,system-ui,sans-serif;
+    color:#f5f3ff;
+    overflow:hidden;
+}
+
+.nav{
+    height:56px;
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 16px;
+    background:rgba(18,4,40,.85);
+    backdrop-filter:blur(18px);
+    box-shadow:
+        inset 0 0 40px rgba(168,85,247,.35),
+        0 15px 60px rgba(0,0,0,.9);
+    z-index:9;
+}
+
+.brand{
+    font-weight:800;
+    letter-spacing:.35em;
+    font-size:.85rem;
+    text-shadow:0 0 22px #c084fc;
+    margin-right:6px;
+}
+
+.btn{
+    min-width:34px;
+    height:34px;
+    border-radius:10px;
+    background:rgba(124,58,237,.28);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    user-select:none;
+    box-shadow:inset 0 0 28px rgba(192,132,252,.45);
+    transition:.18s;
+}
+.btn:hover{
+    transform:translateY(-1px) scale(1.08);
+    background:rgba(124,58,237,.45);
+}
+
+.search{
+    flex:1;
+    height:36px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    padding:0 14px;
+    background:rgba(6,0,18,.7);
+    box-shadow:inset 0 0 0 1px rgba(192,132,252,.25),
+               inset 0 0 28px rgba(124,58,237,.35);
+}
+#url_input{
+    flex:1;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:#e9ddff;
+    font-size:14px;
+}
+#url_input::placeholder{ color:#b9a6ff88 }
+
+iframe{
+    width:100%;
+    height:calc(100vh - 56px);
+    border:none;
+    background:#000;
+}
+
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-thumb{
+    background:#7c3aedaa;
+    border-radius:999px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="nav">
+    <div class="brand">AMETHYST</div>
+
+    <div class="btn" onclick="goHome()">🏠</div>
+    <div class="btn" onclick="back()">⬅</div>
+    <div class="btn" onclick="forward()">➡</div>
+    <div class="btn" onclick="reloadFrame()">↻</div>
+
+    <div class="search">
+        <input id="url_input" placeholder="Search or enter URL"
+               onkeydown="if(event.key==='Enter') go()">
+    </div>
+
+    <div class="btn" onclick="go()">GO</div>
+</div>
+
+<iframe id="frame"></iframe>
+
+<script src="s/uv/uv.bundle.js"></script>
+<script src="s/uv/uv.config.js"></script>
+<script src="s/uv/register-sw.js"></script>
+
+<script>
+let frame = document.getElementById("frame");
+
+window.addEventListener("DOMContentLoaded",()=>{
+    frame.src = "homepage.html";
+});
+
+function normalize(value){
+    value = value.trim();
+    if(value.includes("://")) return value;
+    if(value.includes(".")) return "https://" + value;
+    return "https://www.google.com/search?q=" + encodeURIComponent(value);
+}
+
+function go(){
+    let input = document.getElementById("url_input").value;
+    if(!input) return;
+
+    if(typeof __uv$config==="undefined")
+        return alert("UV proxy failed to load.");
+
+    let final = __uv$config.prefix + __uv$config.encodeUrl(normalize(input));
+    frame.src = final;
+}
+
+function goHome(){
+    frame.src = "homepage.html";
+}
+function back(){ frame.contentWindow.history.back(); }
+function forward(){ frame.contentWindow.history.forward(); }
+function reloadFrame(){ frame.contentWindow.location.reload(); }
+
+window.addEventListener("message",(e)=>{
+    let url = e.data.load;
+    if(!url) return;
+
+    document.getElementById("url_input").value = url;
+    let final = __uv$config.prefix + __uv$config.encodeUrl(normalize(url));
+    frame.src = final;
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <base href="https://cdn.jsdelivr.net/gh/genizy/web-port@master/ultrakill/">
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | ULTRAKILL</title>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+
+        #unity-container {
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        /* --- MOBILE WASD BUTTONS --- */
+        #mobile-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            z-index: 9999;
+            user-select: none;
+        }
+
+        .key-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .key-btn {
+            width: 55px;
+            height: 55px;
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 10px;
+            font-size: 22px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .key-btn:active {
+            background: rgba(255, 255, 255, 0.6);
+            color: black;
+        }
+
+            }
+        }
+    </style>
+</head>
+
+<body style="text-align: center; padding: 0; border: 0; margin: 0;">
+    
+    <!-- mobile WASD -->
+    <div id="mobile-controls">
+        <div class="key-btn" data-key="w">W</div>
+        <div class="key-row">
+            <div class="key-btn" data-key="a">A</div>
+            <div class="key-btn" data-key="s">S</div>
+            <div class="key-btn" data-key="d">D</div>
+        </div>
+    </div>
+
+    <div id='loading-text' style="color: black; font-family: cursive; font-size: 48px; text-align: center; margin-top: 20px;">LOADING...</div>
+    <canvas id="unity-canvas" tabindex="-1" hidden></canvas>
+    <script src="Build/ultrakill.loader.js"></script>
+
+    <script>
+        /* ----------------- MOBILE KEY EVENTS ----------------- */
+        function sendKey(key, type) {
+            document.dispatchEvent(new KeyboardEvent(type, { key: key, code: key.toUpperCase(), bubbles: true }));
+        }
+
+        document.querySelectorAll(".key-btn").forEach(btn => {
+            let key = btn.dataset.key;
+
+            btn.addEventListener("touchstart", (e) => {
+                e.preventDefault();
+                sendKey(key, "keydown");
+            });
+
+            btn.addEventListener("touchend", (e) => {
+                e.preventDefault();
+                sendKey(key, "keyup");
+            });
+        });
+
+        /* ----------------- UNITY GAME LOADING ----------------- */
+        var canvas = document.querySelector("#unity-canvas");
+        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+            var meta = document.createElement('meta');
+            meta.name = 'viewport';
+            meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+            document.getElementsByTagName('head')[0].appendChild(meta);
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+            canvas.style.position = "fixed";
+            document.body.style.textAlign = "left";
+        } else {
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                canvas.style.width = window.innerWidth + "px";
+                canvas.style.height = window.innerHeight + "px";
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function mergeFiles(fileParts) {
+            return new Promise((resolve, reject) => {
+                let buffers = [];
+                function fetchPart(index) {
+                    if (index >= fileParts.length) {
+                        let mergedBlob = new Blob(buffers);
+                        let mergedFileUrl = URL.createObjectURL(mergedBlob);
+                        resolve(mergedFileUrl);
+                        return;
+                    }
+                    fetch(fileParts[index]).then((response) => response.arrayBuffer()).then((data) => {
+                        buffers.push(data);
+                        fetchPart(index + 1);
+                    }).catch(reject);
+                }
+                fetchPart(0);
+            });
+        }
+
+        function getParts(file, start, end) {
+            let parts = [];
+            for (let i = start; i <= end; i++) {
+                parts.push(file + ".part" + i);
+            }
+            return parts;
+        }
+
+        Promise.all([
+            mergeFiles(getParts("Build/ultrakill.data.unityweb", 1, 4)),
+            mergeFiles(getParts("Build/ultrakill.wasm.unityweb", 1, 2))
+        ]).then(([dataUrl, wasmurl]) => {
+            document.querySelector("#unity-canvas").hidden = false;
+            createUnityInstance(document.querySelector("#unity-canvas"), {
+                dataUrl: dataUrl,
+                frameworkUrl: "Build/ultrakill.framework.js.unityweb",
+                codeUrl: wasmurl,
+                streamingAssetsUrl: "StreamingAssets",
+                companyName: "Hakita and Cake Logic",
+                productName: "ULTRAKILL",
+                productVersion: "1.4",
+            }).then((e) => {
+                document.querySelector("#loading-text").remove();
+            });
+        });
+    </script>
+</body>
+</html>

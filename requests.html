@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Amethyst Requests</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family:Inter,system-ui,sans-serif;
+  background:
+    radial-gradient(circle at 15% 10%,#7c3aed66,transparent 45%),
+    radial-gradient(circle at 85% 90%,#c084fc55,transparent 55%),
+    #020006;
+  color:#f5f3ff;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+.wrapper{
+  width:440px;
+  max-width:94%;
+}
+
+.card{
+  background:rgba(20,6,45,.88);
+  backdrop-filter:blur(22px);
+  border-radius:26px;
+  padding:30px 28px;
+  box-shadow:
+    inset 0 0 70px rgba(192,132,252,.25),
+    0 45px 140px rgba(0,0,0,.85);
+}
+
+.title{
+  text-align:center;
+  font-weight:800;
+  font-size:26px;
+  letter-spacing:.45em;
+  margin-bottom:6px;
+  text-shadow:0 0 45px #c084fc;
+}
+
+.sub{
+  text-align:center;
+  font-size:12px;
+  opacity:.7;
+  margin-bottom:24px;
+}
+
+.field{
+  margin-bottom:14px;
+}
+
+.field input,
+.field textarea{
+  width:100%;
+  background:#140027;
+  border:none;
+  outline:none;
+  color:#f5f3ff;
+  padding:13px 15px;
+  border-radius:16px;
+  font-size:14px;
+  box-shadow:inset 0 0 25px rgba(192,132,252,.35);
+}
+
+.field textarea{
+  min-height:120px;
+  resize:none;
+}
+
+button{
+  width:100%;
+  padding:13px;
+  border-radius:999px;
+  border:none;
+  font-weight:800;
+  letter-spacing:.3em;
+  cursor:pointer;
+  background:linear-gradient(135deg,#c084fc,#7c3aed);
+  color:#020006;
+  box-shadow:0 0 35px rgba(192,132,252,.9);
+  transition:.25s;
+}
+
+button:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 55px rgba(192,132,252,1);
+}
+
+.status{
+  margin-top:14px;
+  text-align:center;
+  font-size:12px;
+  opacity:0;
+  transition:.3s;
+}
+.status.ok{color:#86efac;opacity:1}
+.status.err{color:#f87171;opacity:1}
+
+/* EXTRA SECTION */
+.extra{
+  margin-top:18px;
+  padding-top:18px;
+  border-top:1px solid rgba(192,132,252,.25);
+}
+
+.extra-title{
+  text-align:center;
+  font-size:11px;
+  letter-spacing:.45em;
+  color:#d8b4fe;
+  opacity:.85;
+  margin-bottom:10px;
+}
+
+.extra-text{
+  font-size:12px;
+  line-height:1.5;
+  opacity:.7;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+  <div class="card">
+    <div class="title">REQUESTS</div>
+    <div class="sub">Send ideas, bugs, games, or feedback</div>
+
+    <div class="field">
+      <input id="name" placeholder="Name (optional)">
+    </div>
+
+    <div class="field">
+      <textarea id="request" placeholder="Write your request here..."></textarea>
+    </div>
+
+    <button onclick="sendRequest()">SEND</button>
+    <div id="status" class="status"></div>
+
+    <!-- EXTRA SECTION -->
+    <div class="extra">
+      <div class="extra-title">EXTRA</div>
+      <div class="extra-text">
+        Requests are reviewed manually.<br>
+        Spam will be ignored.<br>
+        Amethyst updates roll out gradually.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const WEBHOOK_URL =
+"https://discord.com/api/webhooks/1444188837038395424/gL_S_Bn5-OhzB0M7sQ4hNWwXLKXv1ZyK0DIngUcKQurF7ce-5Yp3Qs8GpBmp1nwMMBmk";
+
+function sendRequest(){
+  const name = document.getElementById("name").value.trim() || "Anonymous";
+  const text = document.getElementById("request").value.trim();
+  const status = document.getElementById("status");
+
+  if(!text){
+    status.textContent = "Please write something.";
+    status.className = "status err";
+    return;
+  }
+
+  fetch(WEBHOOK_URL,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      username:"Amethyst Requests",
+      embeds:[{
+        title:"💎 Amethyst Request",
+        color:0xc084fc,
+        fields:[
+          {name:"From",value:name,inline:true},
+          {name:"Message",value:text}
+        ],
+        footer:{text:"Amethyst"}
+      }]
+    })
+  })
+  .then(res=>{
+    if(!res.ok) throw new Error();
+    document.getElementById("request").value="";
+    status.textContent="Request sent!";
+    status.className="status ok";
+  })
+  .catch(()=>{
+    status.textContent="Failed to send request.";
+    status.className="status err";
+  });
+}
+</script>
+
+</body>
+</html>
