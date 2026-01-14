@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<script src="https://cdn.jsdelivr.net/npm/@mercuryworkshop/bare-mux/dist/index.js" defer></script>
+	<script src="uv/uv.bundle.js" defer></script>
+	<script src="uv/uv.config.js" defer></script>
+	<script src="register-sw.js" defer></script>
+	<script src="embed.js" defer></script>
+	<div id="boot">
+		<div class="ring-system">
+			<div class="ring r1"></div>
+			<div class="ring r2"></div>
+			<div class="ring r3"></div>
+			<div class="ring r4"></div>
+			<div class="ring r5"></div>
+			<div class="ring r6"></div>
+			<div class="ring r7"></div>
+		</div>
+	</div>
+
+	<style>
+		#boot {
+			position: fixed;
+			inset: 0;
+			background:
+				radial-gradient(circle at center, #2e1065, #050012 72%);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 99999;
+		}
+
+		.ring-system {
+			position: absolute;
+			width: 420px;
+			height: 420px;
+		}
+
+		.ring {
+			position: absolute;
+			inset: 0;
+			border-radius: 50%;
+			border: 1.5px solid transparent;
+			animation: spin linear infinite;
+		}
+
+		.r1 {
+			border-top-color: #c084fc;
+			animation-duration: 22s
+		}
+
+		.r2 {
+			inset: 20px;
+			border-right-color: #7c3aed;
+			animation-duration: 17s;
+			animation-direction: reverse
+		}
+
+		.r3 {
+			inset: 40px;
+			border-bottom-color: #a855f7;
+			animation-duration: 13s
+		}
+
+		.r4 {
+			inset: 60px;
+			border-left-color: #9333ea;
+			animation-duration: 9s;
+			animation-direction: reverse
+		}
+
+		.r5 {
+			inset: 85px;
+			border-top-color: #d8b4fe;
+			animation-duration: 7s
+		}
+
+		.r6 {
+			inset: 115px;
+			border-right-color: #6d28d9;
+			animation-duration: 5s;
+			animation-direction: reverse
+		}
+
+		.r7 {
+			inset: 145px;
+			border-bottom-color: #c084fc;
+			animation-duration: 3.5s
+		}
+
+		@keyframes spin {
+			to {
+				transform: rotate(360deg)
+			}
+		}
+
+		.boot-ui {
+			position: relative;
+			z-index: 5;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		.boot-title {
+			letter-spacing: .6em;
+			font-weight: 800;
+			margin-top: 320px;
+			text-shadow: 0 0 40px #c084fc;
+		}
+
+		.boot-sub {
+			margin-top: 12px;
+			font-size: 12px;
+			letter-spacing: .25em;
+			opacity: .75;
+		}
+
+		.progress {
+			margin-top: 18px;
+			width: 260px;
+			height: 6px;
+			background: rgba(255, 255, 255, .12);
+			border-radius: 6px;
+			overflow: hidden;
+		}
+
+		.bar {
+			height: 100%;
+			width: 0%;
+			background: linear-gradient(90deg, #a855f7, #c084fc);
+			box-shadow: 0 0 18px #c084fc;
+			transition: width .45s ease;
+		}
+	</style>
+	</body>
+
+
+</html>
