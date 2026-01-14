@@ -1,0 +1,611 @@
+<!-- g.html (AMETHYST Prism Games) -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AMETHYST • Games</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg0:#050112;
+      --bg1:#08021b;
+      --bg2:#120433;
+
+      --text: rgba(255,255,255,.92);
+
+      --amethyst:#c88bff;
+      --amethyst2:#a86cff;
+      --amethyst3:#8c4cff;
+
+      --blur: 18px;
+      --sat: 185%;
+      --ease: cubic-bezier(.18,.98,.22,1);
+
+      --mx: 50vw;
+      --my: 50vh;
+
+      --gridOpacity: .45;
+      --colorBoost: 1;
+      --cursorGlow: .85;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ height:100%; }
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      overflow:hidden;
+      background:
+        radial-gradient(980px 650px at 18% 84%, rgba(200,139,255, calc(.42 * var(--colorBoost))), transparent 62%),
+        radial-gradient(900px 600px at 78% 26%, rgba(168,108,255, calc(.24 * var(--colorBoost))), transparent 62%),
+        radial-gradient(1000px 650px at 55% 12%, rgba(140,76,255, calc(.18 * var(--colorBoost))), transparent 66%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 55%, var(--bg2));
+    }
+
+    /* ===== Prism Grid ===== */
+    .grid{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity: var(--gridOpacity);
+      background:
+        repeating-linear-gradient(to right, rgba(255,255,255,.10) 0px, rgba(255,255,255,.10) 1px, transparent 1px, transparent 72px),
+        repeating-linear-gradient(to bottom, rgba(255,255,255,.10) 0px, rgba(255,255,255,.10) 1px, transparent 1px, transparent 72px);
+      mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,.95), rgba(0,0,0,.55) 55%, rgba(0,0,0,0) 78%);
+    }
+    .grid::after{
+      content:"";
+      position:absolute; inset:0;
+      opacity:.34;
+      background:
+        radial-gradient(1200px 700px at 50% 45%, rgba(200,139,255, calc(.30 * var(--colorBoost))), transparent 65%),
+        radial-gradient(1000px 600px at 72% 35%, rgba(168,108,255, calc(.22 * var(--colorBoost))), transparent 70%),
+        radial-gradient(1000px 700px at 35% 70%, rgba(140,76,255, calc(.18 * var(--colorBoost))), transparent 70%);
+      filter: blur(16px) saturate(165%);
+    }
+
+    /* cursor glow */
+    .cursorGlow{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity: var(--cursorGlow);
+      background:
+        radial-gradient(380px 380px at var(--mx) var(--my), rgba(200,139,255,.30), transparent 60%),
+        radial-gradient(560px 560px at var(--mx) var(--my), rgba(168,108,255,.18), transparent 70%);
+      filter: blur(10px) saturate(190%);
+    }
+
+    /* grain */
+    .grain{
+      position:fixed; inset:0;
+      pointer-events:none;
+      opacity:.10;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      background-size: 240px 240px;
+    }
+
+    /* ===== top-left button ===== */
+    .hamburger{
+      position:fixed; top: 18px; left: 18px;
+      width: 46px; height: 46px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.07));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 18px 48px rgba(0,0,0,.38), 0 0 46px rgba(200,139,255,.16);
+      cursor:pointer;
+      z-index: 90;
+      display:grid;
+      place-items:center;
+      user-select:none;
+      overflow:hidden;
+      transition: transform 220ms var(--ease), border-color 220ms var(--ease), background 220ms var(--ease);
+    }
+    .hamburger:hover{
+      transform: translateY(-1px) scale(1.02);
+      border-color: rgba(200,139,255,.38);
+      background: linear-gradient(180deg, rgba(200,139,255,.18), rgba(255,255,255,.07));
+    }
+    .hamburger .lines{ width: 20px; height: 14px; display:flex; flex-direction:column; justify-content:space-between; }
+    .hamburger .lines span{
+      height: 2px; border-radius: 99px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 0 18px rgba(200,139,255,.22);
+      transition: transform 260ms var(--ease), opacity 260ms var(--ease), width 260ms var(--ease);
+      transform-origin: left center;
+    }
+    body.menuOpen .hamburger .lines span:nth-child(1){ transform: translateY(6px) rotate(45deg); width:22px; }
+    body.menuOpen .hamburger .lines span:nth-child(2){ opacity:0; transform: translateX(-6px); }
+    body.menuOpen .hamburger .lines span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); width:22px; }
+
+    /* ===== drawer ===== */
+    .scrim{ position:fixed; inset:0; background: rgba(0,0,0,.55); opacity:0; pointer-events:none; transition: opacity 220ms var(--ease); z-index:70; }
+    .drawer{
+      position:fixed; top:14px; left:14px;
+      width:320px; height: calc(100vh - 28px);
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.06));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 28px 90px rgba(0,0,0,.55), 0 0 90px rgba(200,139,255,.12);
+      transform: translateX(-112%) scale(.98);
+      opacity:0;
+      transition: transform 260ms var(--ease), opacity 220ms var(--ease);
+      z-index:75;
+      overflow:hidden;
+    }
+    body.menuOpen .scrim{ opacity:1; pointer-events:auto; }
+    body.menuOpen .drawer{ transform: translateX(0) scale(1); opacity:1; }
+
+    .drawerInner{ height:100%; padding:14px; display:flex; flex-direction:column; gap:12px; }
+    .drawerTop{ display:flex; align-items:center; justify-content:space-between; padding:10px 10px 12px; border-bottom:1px solid rgba(255,255,255,.10); }
+    .brand strong{ font-size:13px; letter-spacing:.2px; display:block; }
+    .brand span{ font-size:12px; color: rgba(255,255,255,.68); }
+    .close{
+      height:36px; padding:0 12px; border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      color: rgba(255,255,255,.88);
+      cursor:pointer;
+      transition: transform 220ms var(--ease), border-color 220ms var(--ease), background 220ms var(--ease);
+    }
+    .close:hover{ transform: translateY(-1px); border-color: rgba(200,139,255,.32); background: rgba(200,139,255,.12); }
+
+    .nav{ display:flex; flex-direction:column; gap:10px; padding-top:6px; }
+    .navItem{
+      height:54px; border-radius:18px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 12px; cursor:pointer;
+      opacity:0; transform: translateY(12px) scale(.985); filter: blur(8px);
+    }
+    body.menuOpen .navItem{ animation: navIn 420ms var(--ease) forwards; }
+    body.menuOpen .navItem:nth-child(1){ animation-delay:70ms; }
+    body.menuOpen .navItem:nth-child(2){ animation-delay:115ms; }
+    body.menuOpen .navItem:nth-child(3){ animation-delay:160ms; }
+    body.menuOpen .navItem:nth-child(4){ animation-delay:205ms; }
+    @keyframes navIn{ to{ opacity:1; transform: translateY(0) scale(1); filter: blur(0); } }
+    .navItem:hover{ border-color: rgba(200,139,255,.30); background: rgba(255,255,255,.06); }
+    .navLeft{ display:flex; align-items:center; gap:10px; font-size:13px; }
+    .dot{
+      width:10px; height:10px; border-radius:99px;
+      background: linear-gradient(135deg, rgba(200,139,255,.95), rgba(168,108,255,.55), rgba(140,76,255,.45));
+      box-shadow: 0 0 20px rgba(200,139,255,.30);
+    }
+    .chev{ opacity:.65; }
+    .drawerFoot{ margin-top:auto; padding-top:12px; border-top:1px solid rgba(255,255,255,.10); color: rgba(255,255,255,.62); font-size:12px; line-height:1.35; padding:0 10px 6px; }
+
+    /* ===== Main layout ===== */
+    .stage{
+      position:relative;
+      height:100%;
+      width:100%;
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+
+    .hero{
+      margin-top:70px;
+      text-align:center;
+      opacity:0;
+      transform: translateY(10px);
+      filter: blur(10px);
+      animation: heroIn 720ms var(--ease) forwards 120ms;
+      pointer-events:none;
+    }
+    @keyframes heroIn{ to{ opacity:1; transform: translateY(0); filter: blur(0);} }
+    .hero h1{
+      font-size: clamp(64px, 9vw, 130px);
+      font-weight: 900;
+      letter-spacing: -2px;
+      color: rgba(255,255,255,.46);
+      text-shadow: 0 0 40px rgba(200,139,255,.18), 0 0 90px rgba(200,139,255,.10);
+      line-height:1;
+    }
+    .hero p{ margin-top:8px; font-size:13px; color: rgba(255,255,255,.62); letter-spacing:.2px; }
+
+    .searchBar{
+      margin-top:18px;
+      width: min(760px, 82vw);
+      height: 52px;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.12);
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 18px 48px rgba(0,0,0,.26), 0 0 54px rgba(200,139,255,.12);
+      display:flex; align-items:center; padding:0 14px; gap:10px;
+      opacity:0; transform: translateY(10px) scale(.98); filter: blur(10px);
+      animation: barIn 560ms var(--ease) forwards 220ms;
+      z-index:10;
+    }
+    @keyframes barIn{ to{ opacity:1; transform: translateY(0) scale(1); filter: blur(0);} }
+    .pillDot{ width:10px; height:10px; border-radius:99px; background: rgba(255,255,255,.40); box-shadow:0 0 24px rgba(200,139,255,.34); }
+    .searchBar input{ flex:1; height:100%; background:transparent; border:none; outline:none; color: rgba(255,255,255,.92); font-size:13px; letter-spacing:.2px; }
+    .searchBar input::placeholder{ color: rgba(255,255,255,.60); }
+    .count{ padding:7px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.14); background: rgba(0,0,0,.10); color: rgba(255,255,255,.78); font-size:12px; user-select:none; }
+
+    .wrap{
+      width: min(1040px, 92vw);
+      margin-top: 22px;
+      padding-bottom: 24px;
+      overflow:auto;
+      max-height: calc(100vh - 320px);
+    }
+    .wrap::-webkit-scrollbar{ width:12px; }
+    .wrap::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,.10);
+      border:3px solid rgba(0,0,0,0);
+      background-clip: padding-box;
+      border-radius:999px;
+    }
+    .gridCards{ display:grid; grid-template-columns: repeat(12, 1fr); gap:14px; }
+
+    /* ===== POP UP + BIGGER + COMES UP =====
+       This is the main thing you asked for. */
+    .card{
+      grid-column: span 4;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      padding: 12px;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      user-select:none;
+
+      opacity:0;
+      transform: translateY(34px) scale(.84);
+      filter: blur(12px);
+      animation: cardRisePop 780ms var(--ease) forwards;
+      animation-delay: calc(var(--d, 0) * 110ms + 280ms);
+
+      box-shadow:
+        0 26px 80px rgba(0,0,0,.34),
+        0 0 0 rgba(200,139,255,0);
+
+      transition:
+        transform 240ms var(--ease),
+        border-color 240ms var(--ease),
+        background 240ms var(--ease),
+        box-shadow 240ms var(--ease);
+    }
+
+    /* BIG overshoot: comes UP + gets BIGGER then settles */
+    @keyframes cardRisePop{
+      0%   { opacity:0; transform: translateY(34px) scale(.84); filter: blur(12px); }
+      52%  { opacity:1; transform: translateY(-10px) scale(1.08); filter: blur(0px); }
+      78%  { opacity:1; transform: translateY(4px) scale(.985); }
+      100% { opacity:1; transform: translateY(0px) scale(1); }
+    }
+
+    /* prism aura */
+    .card::before{
+      content:"";
+      position:absolute; inset:-50%;
+      background: radial-gradient(420px 300px at var(--px, 50%) var(--py, 35%),
+        rgba(200,139,255,.30),
+        rgba(168,108,255,.14) 40%,
+        transparent 70%);
+      filter: blur(18px) saturate(190%);
+      opacity:.9;
+      pointer-events:none;
+      transition: opacity 240ms var(--ease);
+    }
+
+    /* neon edge */
+    .card::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius: 20px;
+      padding: 1px;
+      background: linear-gradient(135deg,
+        rgba(200,139,255,.60),
+        rgba(168,108,255,.24),
+        rgba(140,76,255,.18),
+        rgba(255,255,255,.08)
+      );
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity:.30;
+      pointer-events:none;
+      transition: opacity 240ms var(--ease);
+    }
+
+    /* hover = extra pop bigger + up */
+    .card:hover{
+      transform: translateY(-10px) scale(1.06);
+      border-color: rgba(200,139,255,.44);
+      background: rgba(255,255,255,.07);
+      box-shadow:
+        0 34px 95px rgba(0,0,0,.46),
+        0 0 66px rgba(200,139,255,.18),
+        0 0 140px rgba(168,108,255,.11);
+    }
+    .card:hover::after{ opacity:.62; }
+    .card:hover::before{ opacity:1; }
+
+    /* click = quick bump (like "pop") */
+    .card:active{
+      transform: translateY(-4px) scale(1.02);
+    }
+
+    .thumb{
+      height: 150px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background:
+        radial-gradient(140px 100px at 25% 30%, rgba(255,255,255,.22), transparent 60%),
+        linear-gradient(135deg, rgba(200,139,255,.34), rgba(168,108,255,.18), rgba(140,76,255,.14));
+      position:relative;
+      overflow:hidden;
+      margin-bottom: 10px;
+      box-shadow: 0 16px 44px rgba(0,0,0,.22);
+    }
+    .thumb img{
+      width:100%; height:100%;
+      object-fit: cover;
+      display:block;
+      filter: saturate(1.15) contrast(1.05);
+      opacity:.95;
+    }
+    .thumb::after{
+      content:"";
+      position:absolute; inset:-30%;
+      background: conic-gradient(from 90deg,
+        rgba(255,255,255,.16),
+        transparent 30%,
+        rgba(200,139,255,.18),
+        transparent 60%,
+        rgba(168,108,255,.12)
+      );
+      filter: blur(18px);
+      opacity:.92;
+      animation: spin 16s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes spin{ to{ transform: rotate(360deg); } }
+
+    .card strong{
+      font-size: 13px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .badge{
+      font-size: 11px;
+      color: rgba(255,255,255,.78);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      box-shadow: 0 0 26px rgba(200,139,255,.12);
+    }
+    .card span{ color: rgba(255,255,255,.66); font-size: 12px; line-height: 1.35; }
+
+    /* click burst particles */
+    .burst{
+      position: fixed;
+      width: 10px; height: 10px;
+      border-radius: 999px;
+      pointer-events:none;
+      z-index: 200;
+      opacity: 0;
+      transform: translate(-50%,-50%) scale(.9);
+      animation: burstMove 520ms var(--ease) forwards;
+      box-shadow: 0 0 18px rgba(200,139,255,.45);
+    }
+    @keyframes burstMove{
+      0%   { opacity: 0; transform: translate(-50%,-50%) scale(.6); }
+      15%  { opacity: .95; }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.2); }
+    }
+
+    @media (max-width: 900px){ .card{ grid-column: span 6; } }
+    @media (max-width: 640px){
+      .card{ grid-column: span 12; }
+      .searchBar{ width: min(520px, 86vw); }
+      .wrap{ max-height: calc(100vh - 360px); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="grid"></div>
+  <div class="cursorGlow"></div>
+  <div class="grain"></div>
+
+  <!-- nav button -->
+  <button class="hamburger" id="menuBtn" aria-label="Open menu" title="Menu">
+    <div class="lines" aria-hidden="true"><span></span><span></span><span></span></div>
+  </button>
+
+  <!-- drawer -->
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" aria-label="Sidebar">
+    <div class="drawerInner">
+      <div class="drawerTop">
+        <div class="brand">
+          <strong>AMETHYST</strong>
+          <span>games</span>
+        </div>
+        <button class="close" id="closeBtn">Close</button>
+      </div>
+
+      <div class="nav">
+        <div class="navItem" data-href="index.html"><div class="navLeft"><span class="dot"></span> Home</div><div class="chev">›</div></div>
+        <div class="navItem" data-href="g.html"><div class="navLeft"><span class="dot"></span> Games</div><div class="chev">›</div></div>
+        <div class="navItem" data-href="index.html"><div class="navLeft"><span class="dot"></span> Browser</div><div class="chev">›</div></div>
+        <div class="navItem" data-href="index.html"><div class="navLeft"><span class="dot"></span> Settings</div><div class="chev">›</div></div>
+      </div>
+
+      <div class="drawerFoot">
+        Search games, then click to open.
+        <br/>Slope uses <b>Slope.html</b> + <b>Slope.png</b>.
+      </div>
+    </div>
+  </aside>
+
+  <!-- main -->
+  <div class="stage">
+    <div class="hero">
+      <h1>AMETHYST</h1>
+      <p>Games • Prism</p>
+    </div>
+
+    <div class="searchBar" aria-label="Game search">
+      <div class="pillDot"></div>
+      <input id="search" placeholder="Search games..." autocomplete="off" />
+      <div class="count" id="count">1</div>
+    </div>
+
+    <div class="wrap">
+      <div class="gridCards" id="gridCards">
+        <!-- SLOPE CARD -->
+        <div class="card" style="--d:0" data-name="slope" data-href="Slope.html" aria-label="Slope">
+          <div class="thumb">
+            <img src="Slope.png" alt="Slope" onerror="this.remove()">
+          </div>
+          <strong>
+            Slope
+            <span class="badge">Play</span>
+          </strong>
+          <span>Pops up + gets bigger • glows • click for burst.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* cursor follow background */
+    const root = document.documentElement;
+    let raf = 0, nx = innerWidth/2, ny = innerHeight/2;
+    function schedule(){
+      if (raf) return;
+      raf = requestAnimationFrame(()=>{
+        raf = 0;
+        root.style.setProperty("--mx", nx + "px");
+        root.style.setProperty("--my", ny + "px");
+      });
+    }
+    addEventListener("mousemove", (e)=>{ nx=e.clientX; ny=e.clientY; schedule(); }, {passive:true});
+    addEventListener("touchmove", (e)=>{ nx=e.touches[0].clientX; ny=e.touches[0].clientY; schedule(); }, {passive:true});
+
+    /* menu open/close */
+    const menuBtn = document.getElementById("menuBtn");
+    const scrim = document.getElementById("scrim");
+    const closeBtn = document.getElementById("closeBtn");
+    const drawer = document.getElementById("drawer");
+
+    function openMenu(){ document.body.classList.add("menuOpen"); }
+    function closeMenu(){ document.body.classList.remove("menuOpen"); }
+    function toggleMenu(){ document.body.classList.contains("menuOpen") ? closeMenu() : openMenu(); }
+
+    menuBtn.addEventListener("click", toggleMenu);
+    scrim.addEventListener("click", closeMenu);
+    closeBtn.addEventListener("click", closeMenu);
+
+    // vapor-ish hover open (desktop)
+    menuBtn.addEventListener("mouseenter", ()=> openMenu());
+    drawer.addEventListener("mouseleave", ()=> closeMenu());
+
+    // drawer navigation
+    document.querySelectorAll(".navItem[data-href]").forEach(item=>{
+      item.addEventListener("click", ()=> window.location.href = item.dataset.href);
+    });
+
+    /* cards */
+    const cards = [...document.querySelectorAll(".card[data-href]")];
+
+    // glow follows mouse INSIDE each card
+    cards.forEach(card=>{
+      card.addEventListener("mousemove", (e)=>{
+        const r = card.getBoundingClientRect();
+        const px = ((e.clientX - r.left) / r.width) * 100;
+        const py = ((e.clientY - r.top) / r.height) * 100;
+        card.style.setProperty("--px", px + "%");
+        card.style.setProperty("--py", py + "%");
+      }, {passive:true});
+
+      card.addEventListener("mouseleave", ()=>{
+        card.style.setProperty("--px", "50%");
+        card.style.setProperty("--py", "35%");
+      });
+
+      // click burst + navigate
+      card.addEventListener("click", (e)=>{
+        burst(e.clientX, e.clientY);
+        setTimeout(()=> window.location.href = card.dataset.href, 90);
+      });
+    });
+
+    function burst(x, y){
+      const count = 18;
+      for (let i=0; i<count; i++){
+        const p = document.createElement("div");
+        p.className = "burst";
+        p.style.left = x + "px";
+        p.style.top = y + "px";
+
+        const ang = Math.random() * Math.PI * 2;
+        const dist = 60 + Math.random() * 90;
+        const dx = Math.cos(ang) * dist;
+        const dy = Math.sin(ang) * dist;
+
+        p.style.setProperty("--dx", dx.toFixed(1) + "px");
+        p.style.setProperty("--dy", dy.toFixed(1) + "px");
+
+        const s = 6 + Math.random() * 10;
+        p.style.width = s + "px";
+        p.style.height = s + "px";
+        p.style.background = (Math.random() < 0.5)
+          ? "rgba(200,139,255,.9)"
+          : "rgba(255,255,255,.85)";
+
+        document.body.appendChild(p);
+        p.addEventListener("animationend", ()=> p.remove());
+      }
+    }
+
+    /* search filter */
+    const search = document.getElementById("search");
+    const count = document.getElementById("count");
+
+    function filter(){
+      const q = (search.value || "").trim().toLowerCase();
+      let visible = 0;
+      cards.forEach(c=>{
+        const name = (c.dataset.name || "").toLowerCase();
+        const show = !q || name.includes(q);
+        c.style.display = show ? "" : "none";
+        if (show) visible++;
+      });
+      count.textContent = String(visible);
+    }
+    search.addEventListener("input", filter);
+    search.addEventListener("keydown", (e)=>{
+      if (e.key === "Enter"){
+        const first = cards.find(c => c.style.display !== "none");
+        if (first) first.click();
+      }
+      if (e.key === "Escape") search.blur();
+    });
+    filter();
+
+    addEventListener("keydown", (e)=>{ if (e.key === "Escape") closeMenu(); });
+  </script>
+</body>
+</html>

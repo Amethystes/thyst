@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Classroom</title>
+  <meta name="description" content="Bright, smooth, coding + educational classroom hub." />
+  <meta name="theme-color" content="#38E8FF"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg0:#020814;
+      --bg1:#041a3b;
+      --bg2:#03112a;
+
+      --cyan:#38E8FF;
+      --cyan2:#76F7FF;
+      --blue:#2B78FF;
+
+      --stroke: rgba(255,255,255,.14);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+
+      --blur: 18px;
+      --sat: 175%;
+      --ease: cubic-bezier(.18,.98,.22,1);
+      --speed: 220ms;
+
+      --mx: 50vw;
+      --my: 45vh;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ height:100%; }
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      overflow:hidden;
+      background:
+        radial-gradient(1100px 650px at 18% 80%, color-mix(in srgb, var(--cyan) 35%, transparent), transparent 62%),
+        radial-gradient(900px 620px at 80% 20%, color-mix(in srgb, var(--blue) 30%, transparent), transparent 60%),
+        radial-gradient(900px 600px at 52% 10%, color-mix(in srgb, var(--cyan2) 18%, transparent), transparent 65%),
+        linear-gradient(180deg, var(--bg0), var(--bg1) 55%, var(--bg2));
+    }
+
+    /* grid + glow */
+    .grid{
+      position:fixed; inset:0; pointer-events:none;
+      opacity:.42;
+      background:
+        repeating-linear-gradient(to right, rgba(255,255,255,.10) 0px, rgba(255,255,255,.10) 1px, transparent 1px, transparent 72px),
+        repeating-linear-gradient(to bottom, rgba(255,255,255,.10) 0px, rgba(255,255,255,.10) 1px, transparent 1px, transparent 72px);
+      mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,.95), rgba(0,0,0,.55) 55%, rgba(0,0,0,0) 80%);
+      z-index:0;
+    }
+    .cursorGlow{
+      position:fixed; inset:0; pointer-events:none;
+      opacity:.95;
+      background:
+        radial-gradient(520px 520px at var(--mx) var(--my), color-mix(in srgb, var(--cyan) 26%, transparent), transparent 60%),
+        radial-gradient(820px 820px at var(--mx) var(--my), color-mix(in srgb, var(--blue) 14%, transparent), transparent 70%);
+      filter: blur(10px) saturate(190%);
+      z-index:1;
+    }
+    .grain{
+      position:fixed; inset:0; pointer-events:none;
+      opacity:.10;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      background-size: 240px 240px;
+      z-index:2;
+    }
+
+    .wrap{
+      position:relative;
+      z-index:10;
+      height:100%;
+      width:100%;
+      padding: 18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .shell{
+      width: min(1100px, 96vw);
+      height: min(760px, 92vh);
+      border-radius: 28px;
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow:
+        0 44px 140px rgba(0,0,0,.60),
+        0 0 110px color-mix(in srgb, var(--cyan) 16%, transparent);
+      overflow:hidden;
+      position:relative;
+      transform: translateY(14px) scale(.98);
+      opacity:0;
+      filter: blur(10px);
+      animation: popIn 720ms var(--ease) forwards 70ms;
+    }
+    @keyframes popIn{
+      to{ opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+
+    .shell::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background: conic-gradient(from 120deg,
+        color-mix(in srgb, var(--cyan) 46%, transparent),
+        color-mix(in srgb, var(--blue) 26%, transparent),
+        color-mix(in srgb, var(--cyan2) 22%, transparent),
+        color-mix(in srgb, var(--cyan) 46%, transparent)
+      );
+      filter: blur(28px) saturate(190%);
+      opacity:.55;
+      pointer-events:none;
+    }
+
+    .inner{
+      position:relative;
+      height:100%;
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    /* top bar */
+    .top{
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .brand strong{
+      font-size: 14px;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .pill{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      color: rgba(255,255,255,.82);
+      font-size: 11px;
+    }
+    .brand span{
+      font-size: 12px;
+      color: rgba(255,255,255,.70);
+    }
+
+    .miniBtns{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .miniBtn{
+      height: 40px;
+      padding: 0 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      color: rgba(255,255,255,.88);
+      cursor:pointer;
+      user-select:none;
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background var(--speed) var(--ease);
+      display:flex;
+      align-items:center;
+      gap: 8px;
+      white-space:nowrap;
+    }
+    .miniBtn:hover{
+      transform: translateY(-2px) rotate(-1deg) scale(1.02);
+      border-color: color-mix(in srgb, var(--cyan) 40%, rgba(255,255,255,.14));
+      background: color-mix(in srgb, var(--cyan) 12%, rgba(0,0,0,.10));
+    }
+
+    /* content */
+    .content{
+      padding: 18px;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 14px;
+      overflow:hidden;
+      min-height:0;
+    }
+
+    .panel{
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+      box-shadow: 0 24px 70px rgba(0,0,0,.30);
+      overflow:hidden;
+      position:relative;
+      min-width:0;
+    }
+    .panel::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
+      opacity:.30;
+      pointer-events:none;
+      mask-image: radial-gradient(circle at 30% 20%, rgba(0,0,0,.9), rgba(0,0,0,.35) 55%, rgba(0,0,0,0) 80%);
+    }
+
+    .hero{
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      height:100%;
+      min-height:0;
+    }
+
+    .headline{
+      font-size: clamp(22px, 3.2vw, 34px);
+      line-height:1.08;
+      letter-spacing:-.3px;
+      font-weight: 900;
+    }
+    .sub{
+      color: var(--muted);
+      font-size: 13px;
+      line-height:1.5;
+      max-width: 62ch;
+    }
+
+    .tagRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top: 6px;
+    }
+    .tag{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.86);
+      font-size: 12px;
+      box-shadow: 0 0 34px color-mix(in srgb, var(--cyan) 12%, transparent);
+    }
+
+    .codeArea{
+      margin-top: 10px;
+      flex:1;
+      min-height:0;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.16);
+      overflow:auto;
+      padding: 14px;
+      position:relative;
+    }
+    .codeArea::-webkit-scrollbar{ width: 12px; height: 12px; }
+    .codeArea::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,.10);
+      border: 3px solid rgba(0,0,0,0);
+      background-clip: padding-box;
+      border-radius: 999px;
+    }
+
+    .codeLine{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      color: rgba(255,255,255,.86);
+      white-space: pre;
+    }
+    .dim{ color: rgba(255,255,255,.55); }
+    .cyan{ color: color-mix(in srgb, var(--cyan) 92%, white); }
+    .blue{ color: color-mix(in srgb, var(--blue) 88%, white); }
+    .warn{ color: #ffd36a; }
+
+    .side{
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      height:100%;
+      min-height:0;
+    }
+
+    .card{
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+      box-shadow: 0 22px 70px rgba(0,0,0,.25);
+    }
+    .card h3{
+      font-size: 13px;
+      letter-spacing:.2px;
+    }
+    .card p{
+      font-size: 12px;
+      color: rgba(255,255,255,.70);
+      line-height:1.45;
+    }
+
+    .list{
+      display:grid;
+      gap: 10px;
+      overflow:auto;
+      padding-right: 6px;
+      min-height:0;
+    }
+    .list::-webkit-scrollbar{ width: 12px; }
+    .list::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,.10);
+      border: 3px solid rgba(0,0,0,0);
+      background-clip: padding-box;
+      border-radius: 999px;
+    }
+
+    .item{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+      padding: 12px;
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background var(--speed) var(--ease);
+    }
+    .item:hover{
+      transform: translateY(-3px) rotate(-.6deg);
+      border-color: color-mix(in srgb, var(--cyan) 38%, rgba(255,255,255,.14));
+      background: rgba(255,255,255,.06);
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      margin-top: 4px;
+      background: linear-gradient(135deg, rgba(255,255,255,.22), color-mix(in srgb, var(--cyan) 86%, #fff0), color-mix(in srgb, var(--blue) 62%, #fff0));
+      box-shadow: 0 0 22px color-mix(in srgb, var(--cyan) 22%, transparent);
+      flex: 0 0 auto;
+    }
+    .item strong{ font-size: 12px; }
+    .item span{ display:block; font-size: 12px; color: rgba(255,255,255,.68); margin-top: 2px; line-height:1.35; }
+
+    /* footer CTA */
+    .foot{
+      padding: 14px 18px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .footText{
+      font-size: 12px;
+      color: rgba(255,255,255,.70);
+      line-height:1.35;
+    }
+    .cta{
+      height: 48px;
+      padding: 0 18px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 26%, rgba(255,255,255,.10)), rgba(0,0,0,.12));
+      color: rgba(255,255,255,.94);
+      cursor:pointer;
+      user-select:none;
+      font-weight: 800;
+      letter-spacing:.2px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      box-shadow:
+        0 22px 70px rgba(0,0,0,.45),
+        0 0 90px color-mix(in srgb, var(--cyan) 18%, transparent);
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), filter var(--speed) var(--ease);
+      white-space:nowrap;
+    }
+    .cta:hover{
+      transform: translateY(-2px) rotate(-1deg) scale(1.02);
+      border-color: color-mix(in srgb, var(--cyan) 55%, rgba(255,255,255,.16));
+      filter: brightness(1.05);
+    }
+    .cta:active{ transform: translateY(0) scale(.99); }
+
+    /* toast notification */
+    .toastWrap{
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 9999;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      pointer-events:none;
+    }
+    .toast{
+      pointer-events:auto;
+      width: min(360px, 92vw);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 28px 90px rgba(0,0,0,.55);
+      padding: 12px;
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      transform: translateY(-10px);
+      opacity:0;
+      filter: blur(8px);
+      animation: toastIn 520ms var(--ease) forwards;
+    }
+    @keyframes toastIn{ to{ transform: translateY(0); opacity:1; filter: blur(0);} }
+    .tDot{
+      width:10px;height:10px;border-radius:999px;
+      margin-top: 5px;
+      background: color-mix(in srgb, var(--cyan) 88%, white);
+      box-shadow: 0 0 26px color-mix(in srgb, var(--cyan) 35%, transparent);
+      flex: 0 0 auto;
+    }
+    .tBody strong{ font-size: 12px; display:block; }
+    .tBody span{ font-size: 12px; color: rgba(255,255,255,.70); display:block; margin-top: 2px; line-height:1.35; }
+    .tClose{
+      margin-left:auto;
+      width: 34px; height: 34px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      color: rgba(255,255,255,.92);
+      cursor:pointer;
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background var(--speed) var(--ease);
+    }
+    .tClose:hover{
+      transform: translateY(-1px) rotate(-3deg) scale(1.03);
+      border-color: color-mix(in srgb, var(--cyan) 45%, rgba(255,255,255,.14));
+      background: color-mix(in srgb, var(--cyan) 12%, rgba(0,0,0,.10));
+    }
+
+    @media (max-width: 940px){
+      .content{ grid-template-columns: 1fr; }
+      .shell{ height: min(820px, 92vh); }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="grid"></div>
+  <div class="cursorGlow"></div>
+  <div class="grain"></div>
+
+  <div class="toastWrap" id="toastWrap"></div>
+
+  <div class="wrap">
+    <main class="shell" role="main" aria-label="Classroom landing">
+      <div class="inner">
+        <header class="top">
+          <div class="brand">
+            <strong>
+              AMETHYST • Classroom
+              <span class="pill">Bright Cyan Mode</span>
+            </strong>
+            <span>Educational hub vibes — coding, notes, and smooth UI.</span>
+          </div>
+
+          <div class="miniBtns">
+            <button class="miniBtn" id="notifyBtn" title="Show notification">🔔 Notify</button>
+            <button class="miniBtn" id="scrollBtn" title="Scroll code">⌄ Scroll</button>
+          </div>
+        </header>
+
+        <section class="content">
+          <div class="panel">
+            <div class="hero">
+              <div>
+                <div class="headline">Coding + Educational<br/>but <span style="color: color-mix(in srgb, var(--cyan) 92%, white);">bright</span> and <span style="color: color-mix(in srgb, var(--blue) 92%, white);">clean</span>.</div>
+                <div class="sub">
+                </div>
+
+                <div class="tagRow">
+                  <div class="tag">📘 Notes</div>
+                  <div class="tag">🧠 Practice</div>
+                  <div class="tag">🧩 Challenges</div>
+                  <div class="tag">⚡ Smooth UI</div>
+                </div>
+              </div>
+
+              <div class="codeArea" id="codeArea" aria-label="Code text">
+                <div class="codeLine dim">// welcome to classroom mode</div>
+                <div class="codeLine"><span class="cyan">const</span> mode = <span class="warn">"bright-cyan"</span>;</div>
+                <div class="codeLine"><span class="cyan">const</span> topics = [<span class="warn">"HTML"</span>, <span class="warn">"CSS"</span>, <span class="warn">"JS"</span>, <span class="warn">"logic"</span>, <span class="warn">"debugging"</span>];</div>
+                <div class="codeLine dim">// quick tips</div>
+                <div class="codeLine"><span class="blue">1)</span> Write small changes, test often.</div>
+                <div class="codeLine"><span class="blue">2)</span> Use semantic HTML + clean class names.</div>
+                <div class="codeLine"><span class="blue">3)</span> Keep animations <span class="cyan">fast</span> + <span class="cyan">smooth</span>.</div>
+                <div class="codeLine"><span class="blue">4)</span> Learn by building: buttons, cards, layouts, forms.</div>
+                <div class="codeLine dim">// mini “lesson” block</div>
+                <div class="codeLine"><span class="cyan">function</span> <span class="blue">clamp</span>(value, min, max){</div>
+                <div class="codeLine">  <span class="cyan">return</span> Math.min(max, Math.max(min, value));</div>
+                <div class="codeLine">}</div>
+                <div class="codeLine"></div>
+                <div class="codeLine dim">// layout checklist</div>
+                <div class="codeLine">- consistent spacing (12/14/16)</div>
+                <div class="codeLine">- readable text contrast</div>
+                <div class="codeLine">- hover feedback on everything clickable</div>
+                <div class="codeLine">- keep shadows soft (no harsh black)</div>
+                <div class="codeLine"></div>
+                <div class="codeLine dim">// practice prompt</div>
+                <div class="codeLine"><span class="cyan">/*</span> Build a card grid, add a search bar, add a modal. <span class="cyan">*/</span></div>
+                <div class="codeLine"><span class="cyan">/*</span> Then add a settings panel for colors + motion. <span class="cyan">*/</span></div>
+                <div class="codeLine"></div>
+                <div class="codeLine dim">// more filler “coding text”</div>
+                <div class="codeLine"><span class="cyan">let</span> progress = <span class="blue">0</span>;</div>
+                <div class="codeLine"><span class="cyan">while</span> (progress &lt; <span class="blue">100</span>) { progress += <span class="blue">5</span>; }</div>
+                <div class="codeLine"><span class="cyan">console</span>.log(<span class="warn">"ready for classroom"</span>);</div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="panel">
+            <div class="side">
+              <div class="card">
+                <h3>What you can put here</h3>
+                <p>Educational activitys</p>
+              </div>
+
+              <div class="list" aria-label="Educational blocks">
+                <div class="item">
+                  <div class="dot"></div>
+                  <div>
+                    <strong>HTML Basics</strong>
+                    <span>Structure pages with sections, headers, buttons, and forms.</span>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="dot"></div>
+                  <div>
+                    <strong>CSS Layout</strong>
+                    <span>Use grid/flex + consistent spacing for smooth UI.</span>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="dot"></div>
+                  <div>
+                    <strong>JavaScript</strong>
+                    <span>Events, DOM updates, modals, search filters, and storage.</span>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="dot"></div>
+                  <div>
+                    <strong>Practice Mode</strong>
+                    <span>Build small components, then combine into a dashboard.</span>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="dot"></div>
+                  <div>
+                    <strong>Debugging</strong>
+                    <span>Check console, isolate issues, and test tiny steps.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <footer class="foot">
+          <div class="footText">
+            Bottom button goes to your classroom page.<br/>
+            <span class="dim">Coding education</span>
+          </div>
+
+          <button class="cta" id="goBtn" title="Go to classroom (index2.html)">
+            📚 Go to Classroom <span style="opacity:.75;">→</span>
+          </button>
+        </footer>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // cursor glow follows mouse
+    const root = document.documentElement;
+    let raf = 0, nx = innerWidth/2, ny = innerHeight/2;
+    function schedule(){
+      if (raf) return;
+      raf = requestAnimationFrame(()=>{
+        raf = 0;
+        root.style.setProperty("--mx", nx + "px");
+        root.style.setProperty("--my", ny + "px");
+      });
+    }
+    addEventListener("mousemove", (e)=>{ nx=e.clientX; ny=e.clientY; schedule(); }, {passive:true});
+    addEventListener("touchmove", (e)=>{ nx=e.touches[0].clientX; ny=e.touches[0].clientY; schedule(); }, {passive:true});
+
+    // go to classroom
+    document.getElementById("goBtn").addEventListener("click", ()=>{
+      window.location.href = "index2.html";
+    });
+
+    // smooth little helpers
+    const codeArea = document.getElementById("codeArea");
+    document.getElementById("scrollBtn").addEventListener("click", ()=>{
+      codeArea.scrollTo({ top: codeArea.scrollHeight, behavior: "smooth" });
+    });
+
+    // notification/toast
+    const toastWrap = document.getElementById("toastWrap");
+    function toast(title, msg){
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.innerHTML = `
+        <div class="tDot"></div>
+        <div class="tBody">
+          <strong>${title}</strong>
+          <span>${msg}</span>
+        </div>
+        <button class="tClose" aria-label="Close">✕</button>
+      `;
+      const btn = t.querySelector(".tClose");
+      btn.addEventListener("click", ()=>{
+        t.animate([{opacity:1, transform:"translateY(0)"},{opacity:0, transform:"translateY(-8px)"}],
+          {duration:180, easing:"cubic-bezier(.18,.98,.22,1)"}
+        );
+        setTimeout(()=> t.remove(), 170);
+      });
+      toastWrap.appendChild(t);
+      setTimeout(()=> { if (t.isConnected) btn.click(); }, 4200);
+    }
+
+    document.getElementById("notifyBtn").addEventListener("click", ()=>{
+      toast("Classroom Notice", "Click “Go to Classroom” to open classroom information.");
+    });
+
+    // show one on load
+    toast("Welcome", "Bright Cyan classroom landing loaded.");
+  </script>
+</body>
+</html>
