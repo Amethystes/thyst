@@ -1,0 +1,1846 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Amethyst • Apps</title>
+  <meta name="description" content="AMETHYST Apps" />
+  <meta name="theme-color" content="#9E49B3"/>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bgA:#050112;
+      --bgB:#08021b;
+      --bgC:#120433;
+      --bgAngle: 180deg;
+
+      --accent1:#c88bff;
+      --accent2:#a86cff;
+      --accent3:#8c4cff;
+
+      --stroke: rgba(255,255,255,.14);
+
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.68);
+
+      --blur: 18px;
+      --sat: 185%;
+      --ease: cubic-bezier(.18,.98,.22,1);
+      --speed: 240ms;
+
+      --glow: 1;
+      --motion: 1;
+
+      --mx: 50vw;
+      --my: 50vh;
+
+      --gridOpacity: .48;
+      --cursorGlow: .90;
+    }
+
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ height:100%; }
+    body{
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      overflow:hidden;
+
+      background:
+        radial-gradient(980px 650px at 18% 84%, color-mix(in srgb, var(--accent1) 38%, transparent), transparent 62%),
+        radial-gradient(900px 600px at 78% 26%, color-mix(in srgb, var(--accent2) 26%, transparent), transparent 62%),
+        radial-gradient(1000px 650px at 55% 12%, color-mix(in srgb, var(--accent3) 18%, transparent), transparent 66%),
+        linear-gradient(var(--bgAngle), var(--bgA), var(--bgB) 55%, var(--bgC));
+    }
+
+    /* ===== Background layers ===== */
+    .grid{
+      position:fixed; inset:0; pointer-events:none;
+      opacity: var(--gridOpacity);
+      background:
+        repeating-linear-gradient(to right, rgba(255,255,255,.10) 0px, rgba(255,255,255,.10) 1px, transparent 1px, transparent 72px),
+        repeating-linear-gradient(to bottom, rgba(255,255,255,.10) 0px, rgba(255,255,255,.10) 1px, transparent 1px, transparent 72px);
+      mask-image: radial-gradient(circle at 50% 50%, rgba(0,0,0,.95), rgba(0,0,0,.55) 55%, rgba(0,0,0,0) 78%);
+      z-index: 0;
+    }
+    .grid::after{
+      content:"";
+      position:absolute; inset:0;
+      opacity:.34;
+      background:
+        radial-gradient(1200px 700px at 50% 45%, color-mix(in srgb, var(--accent1) 30%, transparent), transparent 65%),
+        radial-gradient(1000px 600px at 72% 35%, color-mix(in srgb, var(--accent2) 22%, transparent), transparent 70%),
+        radial-gradient(1000px 700px at 35% 70%, color-mix(in srgb, var(--accent3) 18%, transparent), transparent 70%);
+      filter: blur(16px) saturate(165%);
+    }
+
+    .cursorGlow{
+      position:fixed; inset:0; pointer-events:none;
+      opacity: var(--cursorGlow);
+      background:
+        radial-gradient(420px 420px at var(--mx) var(--my), color-mix(in srgb, var(--accent1) 30%, transparent), transparent 60%),
+        radial-gradient(640px 640px at var(--mx) var(--my), color-mix(in srgb, var(--accent2) 18%, transparent), transparent 70%);
+      filter: blur(10px) saturate(190%);
+      z-index: 1;
+    }
+
+    .grain{
+      position:fixed; inset:0; pointer-events:none;
+      opacity:.10;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      background-size: 240px 240px;
+      z-index: 2;
+    }
+
+    /* Particles canvas (we will force OFF in JS) */
+    #particles{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+      opacity: .85;
+      display:none;
+    }
+
+    .hamburger{
+      position:fixed; top: 18px; left: 18px;
+      width: 46px; height: 46px;
+      border-radius: 16px;
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.07));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 18px 48px rgba(0,0,0,.38), 0 0 calc(54px * var(--glow)) color-mix(in srgb, var(--accent1) 16%, transparent);
+      cursor:pointer;
+      z-index: 90;
+      display:grid;
+      place-items:center;
+      user-select:none;
+      overflow:hidden;
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background var(--speed) var(--ease);
+    }
+    .hamburger::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background: conic-gradient(from 120deg,
+        color-mix(in srgb, var(--accent1) 42%, transparent),
+        color-mix(in srgb, var(--accent2) 22%, transparent),
+        color-mix(in srgb, var(--accent3) 18%, transparent),
+        color-mix(in srgb, var(--accent1) 42%, transparent)
+      );
+      filter: blur(18px);
+      opacity:.60;
+      transition: opacity var(--speed) var(--ease);
+      pointer-events:none;
+    }
+    .hamburger:hover{
+      transform: translateY(-1px) scale(1.02);
+      border-color: color-mix(in srgb, var(--accent1) 38%, var(--stroke));
+      background: linear-gradient(180deg, color-mix(in srgb, var(--accent1) 18%, rgba(255,255,255,.13)), rgba(255,255,255,.07));
+    }
+    .hamburger:hover::before{ opacity:.80; }
+
+    .hamburger .lines{ width: 20px; height: 14px; display:flex; flex-direction:column; justify-content:space-between; position:relative; z-index:2; }
+    .hamburger .lines span{
+      height: 2px; border-radius: 99px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 0 18px color-mix(in srgb, var(--accent1) 20%, transparent);
+      transition: transform 260ms var(--ease), opacity 260ms var(--ease), width 260ms var(--ease);
+      transform-origin: left center;
+    }
+    body.menuOpen .hamburger .lines span:nth-child(1){ transform: translateY(6px) rotate(45deg); width: 22px; }
+    body.menuOpen .hamburger .lines span:nth-child(2){ opacity: 0; transform: translateX(-6px); }
+    body.menuOpen .hamburger .lines span:nth-child(3){ transform: translateY(-6px) rotate(-45deg); width: 22px; }
+
+    .scrim{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.55);
+      opacity:0; pointer-events:none;
+      transition: opacity var(--speed) var(--ease);
+      z-index: 70;
+    }
+    .drawer{
+      position:fixed; top: 14px; left: 14px;
+      width: 320px; height: calc(100vh - 28px);
+      border-radius: 22px;
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.13), rgba(255,255,255,.06));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 28px 90px rgba(0,0,0,.55), 0 0 calc(90px * var(--glow)) color-mix(in srgb, var(--accent1) 12%, transparent);
+      transform: translateX(-112%) scale(.98);
+      opacity: 0;
+      transition: transform 260ms var(--ease), opacity var(--speed) var(--ease);
+      z-index: 75;
+      overflow:hidden;
+    }
+    .drawer::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background: conic-gradient(from 120deg,
+        color-mix(in srgb, var(--accent1) 28%, transparent),
+        color-mix(in srgb, var(--accent2) 18%, transparent),
+        color-mix(in srgb, var(--accent3) 16%, transparent),
+        color-mix(in srgb, var(--accent1) 28%, transparent)
+      );
+      filter: blur(22px);
+      opacity:.55;
+      pointer-events:none;
+    }
+    body.menuOpen .scrim{ opacity:1; pointer-events:auto; }
+    body.menuOpen .drawer{ transform: translateX(0) scale(1); opacity: 1; }
+
+    .drawerInner{ position:relative; height:100%; padding: 14px; display:flex; flex-direction:column; gap: 12px; }
+    .drawerTop{ display:flex; align-items:center; justify-content:space-between; padding: 10px 10px 12px; border-bottom: 1px solid rgba(255,255,255,.10); }
+    .brand{ display:flex; flex-direction:column; gap:2px; }
+    .brand strong{ font-size: 13px; letter-spacing:.2px; }
+    .brand span{ font-size: 12px; color: rgba(255,255,255,.68); }
+
+    .close{
+      height: 36px; padding: 0 12px; border-radius: 14px;
+      border: 1px solid var(--stroke);
+      background: rgba(0,0,0,.10);
+      color: rgba(255,255,255,.88);
+      cursor:pointer;
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background var(--speed) var(--ease);
+      user-select:none;
+    }
+    .close:hover{
+      transform: translateY(-1px) rotate(-2deg) scale(1.02);
+      border-color: color-mix(in srgb, var(--accent1) 34%, var(--stroke));
+      background: color-mix(in srgb, var(--accent1) 14%, rgba(0,0,0,.10));
+    }
+
+    .nav{ display:flex; flex-direction:column; gap: 10px; padding-top: 6px; }
+    .navItem{
+      height: 54px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 0 12px;
+      cursor:pointer;
+      opacity:0;
+      transform: translateY(12px) scale(.985);
+      filter: blur(8px);
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background var(--speed) var(--ease);
+      user-select:none;
+    }
+    body.menuOpen .navItem{ animation: navIn 420ms var(--ease) forwards; }
+    body.menuOpen .navItem:nth-child(1){ animation-delay: 70ms; }
+    body.menuOpen .navItem:nth-child(2){ animation-delay: 115ms; }
+    body.menuOpen .navItem:nth-child(3){ animation-delay: 160ms; }
+    body.menuOpen .navItem:nth-child(4){ animation-delay: 205ms; }
+    body.menuOpen .navItem:nth-child(5){ animation-delay: 250ms; }
+    @keyframes navIn{ to{ opacity:1; transform: translateY(0) scale(1); filter: blur(0); } }
+
+    .navItem:hover{
+      z-index: 20;
+      transform: translateY(-3px) scale(1.02) rotate(-1.5deg);
+      border-color: color-mix(in srgb, var(--accent1) 26%, rgba(255,255,255,.14));
+      background: rgba(255,255,255,.06);
+    }
+
+    .navLeft{ display:flex; align-items:center; gap: 10px; font-size: 13px; }
+    .dot{
+      width: 10px; height: 10px; border-radius: 999px;
+      background: linear-gradient(135deg, rgba(255,255,255,.22), color-mix(in srgb, var(--accent1) 86%, #fff0), color-mix(in srgb, var(--accent2) 62%, #fff0));
+      box-shadow: 0 0 calc(20px * var(--glow)) color-mix(in srgb, var(--accent1) 26%, transparent);
+    }
+    .chev{ opacity:.65; }
+
+    .drawerFoot{
+      margin-top:auto; padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      color: rgba(255,255,255,.62);
+      font-size: 12px;
+      line-height: 1.35;
+      padding: 0 10px 6px;
+    }
+
+    .wrap{
+      position:relative;
+      z-index: 10;
+      height:100%;
+      width:100%;
+      padding: 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+
+    .topBar{
+      margin: 62px auto 0;
+      width: min(980px, 100%);
+      display:flex;
+      gap: 12px;
+      align-items:stretch;
+      justify-content:space-between;
+      opacity:0;
+      transform: translateY(10px);
+      filter: blur(10px);
+      animation: popIn 680ms var(--ease) forwards 90ms;
+    }
+    @keyframes popIn{ to{ opacity:1; transform: translateY(0); filter: blur(0); } }
+
+    .titleCard{
+      flex: 1;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 28px 90px rgba(0,0,0,.35), 0 0 calc(80px * var(--glow)) color-mix(in srgb, var(--accent1) 12%, transparent);
+      padding: 14px 16px;
+      position:relative;
+      overflow:hidden;
+    }
+    .titleCard::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background: conic-gradient(from 120deg,
+        color-mix(in srgb, var(--accent1) 42%, transparent),
+        color-mix(in srgb, var(--accent2) 22%, transparent),
+        color-mix(in srgb, var(--accent3) 18%, transparent),
+        color-mix(in srgb, var(--accent1) 42%, transparent)
+      );
+      filter: blur(22px) saturate(190%);
+      opacity: .55;
+      pointer-events:none;
+    }
+    .titleInner{ position:relative; z-index:2; display:flex; flex-direction:column; gap: 6px; }
+    .titleInner strong{ font-size: 14px; letter-spacing:.2px; }
+    .titleInner span{ font-size: 12px; color: rgba(255,255,255,.70); }
+
+    .searchCard{
+      width: min(420px, 100%);
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 22px 70px rgba(0,0,0,.35);
+      padding: 12px 12px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease);
+    }
+    .searchCard:hover{
+      transform: translateY(-2px) rotate(-1deg);
+      border-color: color-mix(in srgb, var(--accent1) 30%, rgba(255,255,255,.14));
+    }
+    .searchIcon{
+      width: 36px; height: 36px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      display:grid; place-items:center;
+      box-shadow: 0 0 calc(40px * var(--glow)) color-mix(in srgb, var(--accent1) 12%, transparent);
+      user-select:none;
+    }
+    .searchInput{
+      flex:1;
+      height: 40px;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: rgba(255,255,255,.92);
+      font-size: 13px;
+    }
+    .searchInput::placeholder{ color: rgba(255,255,255,.55); }
+
+    .countPill{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.78);
+      font-size: 12px;
+      user-select:none;
+    }
+
+    .gridApps{
+      width: min(1080px, 100%);
+      margin: 0 auto;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      overflow:auto;
+      padding: 2px 2px 20px;
+    }
+    .gridApps::-webkit-scrollbar{ width: 12px; height: 12px; }
+    .gridApps::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,.10);
+      border: 3px solid rgba(0,0,0,0);
+      background-clip: padding-box;
+      border-radius: 999px;
+    }
+
+    .appCard{
+      position:relative;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      overflow:hidden;
+      cursor:pointer;
+      min-height: 168px;
+      box-shadow: 0 22px 70px rgba(0,0,0,.35);
+      transform: perspective(1000px) translateY(14px) scale(.93) rotateX(8deg);
+      opacity:0;
+      filter: blur(12px);
+      animation: cardIn 720ms var(--ease) forwards;
+      animation-delay: calc(var(--d,0) * 55ms + 120ms);
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease), background var(--speed) var(--ease);
+      user-select:none;
+    }
+    @keyframes cardIn{
+      0%   { opacity:0; transform: perspective(1000px) translateY(24px) scale(.86) rotateX(12deg); filter: blur(14px); }
+      60%  { opacity:1; transform: perspective(1000px) translateY(-8px) scale(1.07) rotateX(0deg); filter: blur(0); }
+      100% { opacity:1; transform: perspective(1000px) translateY(0px) scale(1) rotateX(0deg); filter: blur(0); }
+    }
+
+    .appCard::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background:
+        radial-gradient(460px 260px at 20% 20%, color-mix(in srgb, var(--accent1) 65%, transparent), transparent 60%),
+        radial-gradient(520px 300px at 78% 30%, color-mix(in srgb, var(--accent2) 55%, transparent), transparent 62%),
+        radial-gradient(560px 320px at 45% 90%, color-mix(in srgb, var(--accent3) 40%, transparent), transparent 65%);
+      filter: blur(18px) saturate(190%);
+      opacity: .65;
+      pointer-events:none;
+    }
+    .appCard::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+      opacity: .38;
+      pointer-events:none;
+      mask-image: radial-gradient(circle at 30% 20%, rgba(0,0,0,.9), rgba(0,0,0,.35) 55%, rgba(0,0,0,0) 80%);
+    }
+
+    .appTop{
+      position:relative; z-index:2;
+      height: 112px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      padding: 12px;
+      gap: 10px;
+    }
+
+    .thumb{
+      width: 58px; height: 58px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+      box-shadow: 0 0 calc(60px * var(--glow)) color-mix(in srgb, var(--accent1) 14%, transparent);
+      flex: 0 0 auto;
+    }
+    .thumb img{
+      width:100%; height:100%;
+      object-fit: cover;
+      display:block;
+    }
+
+    .openPill{
+      margin-left:auto;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.12);
+      color: rgba(255,255,255,.86);
+      font-size: 12px;
+      box-shadow: 0 0 calc(46px * var(--glow)) color-mix(in srgb, var(--accent1) 12%, transparent);
+      user-select:none;
+    }
+
+    .appBottom{
+      position:relative; z-index:2;
+      padding: 0 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap: 4px;
+    }
+    .appBottom strong{ font-size: 13px; letter-spacing:.2px; }
+    .appBottom span{ font-size: 12px; color: rgba(255,255,255,.70); line-height: 1.25; }
+
+    .appCard:hover{
+      z-index: 50;
+      transform: perspective(1000px) translateY(-12px) scale(1.08) rotateZ(-2deg);
+      border-color: color-mix(in srgb, var(--accent1) 30%, rgba(255,255,255,.16));
+      background: rgba(255,255,255,.06);
+      box-shadow:
+        0 42px 140px rgba(0,0,0,.60),
+        0 0 calc(100px * var(--glow)) color-mix(in srgb, var(--accent1) 18%, transparent);
+    }
+    .appCard:active{
+      transform: perspective(1000px) translateY(-8px) scale(1.05) rotateZ(1.2deg);
+    }
+
+    /* Window overlay */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.60);
+      opacity:0; pointer-events:none;
+      transition: opacity var(--speed) var(--ease);
+      z-index: 9998;
+    }
+    .window{
+      position:fixed;
+      left: 50%;
+      top: 55%;
+      transform: translate(-50%,-50%) scale(.92);
+      width: min(1100px, 92vw);
+      height: min(760px, 88vh);
+      border-radius: 26px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 44px 140px rgba(0,0,0,.70), 0 0 calc(130px * var(--glow)) color-mix(in srgb, var(--accent1) 18%, transparent);
+      opacity:0; pointer-events:none;
+      transition: opacity var(--speed) var(--ease), transform var(--speed) var(--ease);
+      z-index: 9999;
+      overflow:hidden;
+    }
+    body.playOpen .overlay{ opacity:1; pointer-events:auto; }
+    body.playOpen .window{ opacity:1; pointer-events:auto; transform: translate(-50%,-50%) scale(1); }
+
+    .window::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background: conic-gradient(from 120deg,
+        color-mix(in srgb, var(--accent1) 42%, transparent),
+        color-mix(in srgb, var(--accent2) 22%, transparent),
+        color-mix(in srgb, var(--accent3) 18%, transparent),
+        color-mix(in srgb, var(--accent1) 42%, transparent)
+      );
+      filter: blur(24px) saturate(190%);
+      opacity: .55;
+      pointer-events:none;
+    }
+
+    .winInner{
+      position:relative;
+      height:100%;
+      display:grid;
+      grid-template-rows: 64px 1fr;
+    }
+    .winTop{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .winTitle{
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .winTitle strong{ font-size: 14px; letter-spacing:.2px; }
+    .winTitle span{ font-size: 12px; color: rgba(255,255,255,.68); }
+
+    .xBtn{
+      width: 40px; height: 40px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      color: rgba(255,255,255,.92);
+      cursor:pointer;
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background var(--speed) var(--ease);
+    }
+    .xBtn:hover{
+      transform: translateY(-1px) rotate(-4deg) scale(1.03);
+      border-color: color-mix(in srgb, var(--accent1) 38%, rgba(255,255,255,.14));
+      background: color-mix(in srgb, var(--accent1) 14%, rgba(0,0,0,.10));
+    }
+
+    .frameWrap{
+      position:relative;
+      padding: 14px;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+    .frame{
+      flex:1;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      overflow:hidden;
+      box-shadow: 0 22px 70px rgba(0,0,0,.35);
+      position:relative;
+    }
+    iframe{
+      width:100%; height:100%;
+      border:0;
+      background: transparent;
+    }
+
+    .controlsBar{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap: wrap;
+    }
+    .ctrlBtn{
+      height: 46px;
+      padding: 0 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.90);
+      cursor:pointer;
+      user-select:none;
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background var(--speed) var(--ease);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      min-width: 120px;
+      flex: 1;
+    }
+    .ctrlBtn:hover{
+      transform: translateY(-2px) rotate(-1deg) scale(1.02);
+      border-color: color-mix(in srgb, var(--accent1) 34%, rgba(255,255,255,.14));
+      background: color-mix(in srgb, var(--accent1) 14%, rgba(255,255,255,.08));
+    }
+    .ctrlBtn:active{ transform: translateY(0) scale(.99) rotate(1deg); }
+    .ctrlBtn.secondary{ background: rgba(0,0,0,.10); }
+
+    .pauseBadge{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.14);
+      color: rgba(255,255,255,.80);
+      font-size: 12px;
+      white-space:nowrap;
+      user-select:none;
+    }
+
+    .burstDot{
+      position: fixed;
+      width: 8px; height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 0 20px color-mix(in srgb, var(--accent1) 30%, transparent);
+      pointer-events:none;
+      z-index: 10000;
+    }
+
+    /* Settings */
+    .settingsScrim{
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.58);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--speed) var(--ease);
+      z-index: 9998;
+    }
+    .settingsWin{
+      position: fixed;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -50%) scale(.96);
+      width: min(980px, 92vw);
+      height: min(720px, 84vh);
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow:
+        0 38px 120px rgba(0,0,0,.62),
+        0 0 calc(110px * var(--glow)) color-mix(in srgb, var(--accent1) 18%, transparent);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--speed) var(--ease), transform var(--speed) var(--ease);
+      z-index: 9999;
+      overflow: hidden;
+    }
+    body.settingsOpen .settingsScrim{ opacity: 1; pointer-events: auto; }
+    body.settingsOpen .settingsWin{ opacity: 1; pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+
+    .settingsWin::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background: conic-gradient(from 120deg,
+        color-mix(in srgb, var(--accent1) 42%, transparent),
+        color-mix(in srgb, var(--accent2) 22%, transparent),
+        color-mix(in srgb, var(--accent3) 18%, transparent),
+        color-mix(in srgb, var(--accent1) 42%, transparent)
+      );
+      filter: blur(22px) saturate(190%);
+      opacity: .55;
+      pointer-events:none;
+    }
+
+    .settingsInner{
+      position: relative;
+      height: 100%;
+      display: grid;
+      grid-template-rows: 64px 1fr;
+    }
+
+    .settingsTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .settingsTitle{ display:flex; flex-direction:column; gap:2px; }
+    .settingsTitle strong{ font-size: 14px; letter-spacing:.2px; }
+    .settingsTitle span{ font-size: 12px; color: rgba(255,255,255,.68); }
+
+    .settingsBody{
+      padding: 16px;
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .panel2{
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.10);
+      box-shadow: 0 24px 70px rgba(0,0,0,.30);
+      overflow: hidden;
+    }
+
+    .themesPanel{ padding: 14px; display:flex; flex-direction:column; gap: 10px; min-width: 0; }
+    .themesHead{ display:flex; align-items:flex-end; justify-content:space-between; gap: 10px; }
+    .themesHead h3{ font-size: 13px; letter-spacing:.2px; margin: 0; }
+    .themesHead p{ margin: 0; font-size: 12px; color: rgba(255,255,255,.62); }
+
+    .themeGrid{
+      margin-top: 8px;
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      overflow:auto;
+      padding-right: 6px;
+      max-height: calc(100% - 56px);
+    }
+    .themeGrid::-webkit-scrollbar{ width: 12px; }
+    .themeGrid::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,.10);
+      border: 3px solid rgba(0,0,0,0);
+      background-clip: padding-box;
+      border-radius: 999px;
+    }
+
+    .themeCard{
+      position: relative;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      overflow:hidden;
+      cursor:pointer;
+      min-height: 128px;
+      padding: 12px;
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), box-shadow var(--speed) var(--ease), background var(--speed) var(--ease);
+      user-select:none;
+    }
+    .themeCard::before{
+      content:"";
+      position:absolute; inset:-60%;
+      background:
+        radial-gradient(420px 240px at 30% 30%, var(--tA), transparent 60%),
+        radial-gradient(460px 260px at 75% 35%, var(--tB), transparent 60%),
+        radial-gradient(520px 300px at 50% 85%, var(--tC), transparent 65%);
+      filter: blur(18px) saturate(190%);
+      opacity: .85;
+      pointer-events:none;
+    }
+    .themeCard::after{
+      content:"";
+      position:absolute; inset:0;
+      border-radius: 20px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: .42;
+      pointer-events:none;
+    }
+    .themeMeta{ position: relative; z-index: 2; display:flex; flex-direction:column; gap: 6px; }
+    .themeMeta strong{ font-size: 13px; letter-spacing:.2px; display:flex; align-items:center; justify-content:space-between; gap: 8px; }
+    .themeMeta span{ font-size: 12px; color: rgba(255,255,255,.70); line-height: 1.25; }
+
+    .selectedPill{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      color: rgba(255,255,255,.78);
+      font-size: 11px;
+      display:none;
+    }
+    .themeCard[data-selected="1"] .selectedPill{ display:inline-block; }
+
+    .themeCard:hover{
+      z-index: 50;
+      border-color: color-mix(in srgb, var(--tA) 48%, rgba(255,255,255,.18));
+      background: rgba(255,255,255,.08);
+      transform: translateY(-8px) scale(1.05) rotateZ(-2deg);
+      box-shadow:
+        0 38px 120px rgba(0,0,0,.50),
+        0 0 calc(84px * var(--glow)) color-mix(in srgb, var(--tA) 24%, transparent);
+    }
+
+    .controlsPanel{ padding: 14px; display:flex; flex-direction:column; gap: 12px; overflow:auto; }
+    .controlsPanel::-webkit-scrollbar{ width: 12px; }
+    .controlsPanel::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,.10);
+      border: 3px solid rgba(0,0,0,0);
+      background-clip: padding-box;
+      border-radius: 999px;
+    }
+
+    .controlRow{
+      display:flex; flex-direction:column; gap: 6px;
+      padding: 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.08);
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease);
+    }
+    .controlRow:hover{
+      transform: translateY(-3px) rotate(-1deg);
+      border-color: color-mix(in srgb, var(--accent1) 30%, rgba(255,255,255,.14));
+    }
+    .controlRow label{
+      font-size: 12px;
+      color: rgba(255,255,255,.85);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+    }
+    .controlRow small{ color: rgba(255,255,255,.62); font-size: 11px; }
+    input[type="range"]{ width:100%; accent-color: var(--accent1); cursor:pointer; }
+
+    .btnRow{ display:flex; gap: 10px; }
+    .btn2{
+      flex:1;
+      height: 44px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      color: rgba(255,255,255,.90);
+      cursor:pointer;
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background var(--speed) var(--ease);
+      user-select:none;
+    }
+    .btn2:hover{
+      transform: translateY(-2px) rotate(-1deg) scale(1.02);
+      border-color: color-mix(in srgb, var(--accent1) 36%, rgba(255,255,255,.14));
+      background: color-mix(in srgb, var(--accent1) 14%, rgba(255,255,255,.08));
+    }
+
+    .customPanelTitle{ margin-top:2px; font-size:12px; color:rgba(255,255,255,.80); letter-spacing:.2px; }
+    .customGrid{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .pick{
+      display:flex; align-items:center; justify-content:space-between; gap: 10px;
+      padding: 10px; border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.07);
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease);
+    }
+    .pick:hover{ transform: translateY(-2px) rotate(-.8deg); border-color: color-mix(in srgb, var(--accent1) 28%, rgba(255,255,255,.14)); }
+    .pick label{ font-size: 12px; color: rgba(255,255,255,.86); }
+
+    .colorInput{
+      width: 42px; height: 32px; padding:0; border:none; background:transparent; cursor:pointer;
+    }
+    .colorInput::-webkit-color-swatch-wrapper{ padding:0; }
+    .colorInput::-webkit-color-swatch{ border-radius:10px; border: 1px solid rgba(255,255,255,.18); }
+
+    .toggleRow{
+      display:flex; align-items:center; justify-content:space-between; gap: 10px;
+      padding: 10px 12px; border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.07);
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease);
+      opacity: .55;
+      pointer-events: none; /* particles are forced off on this page */
+      user-select:none;
+    }
+    .toggleRow:hover{ transform: translateY(-2px) rotate(-.8deg); border-color: color-mix(in srgb, var(--accent1) 28%, rgba(255,255,255,.14)); }
+    .toggleRow span{ font-size: 12px; color: rgba(255,255,255,.86); }
+
+    .switch{
+      width: 48px; height: 28px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.16);
+      background: rgba(255,255,255,.08);
+      position: relative; cursor: pointer;
+      transition: background var(--speed) var(--ease), border-color var(--speed) var(--ease);
+      flex: 0 0 auto;
+    }
+    .switch::after{
+      content:"";
+      position:absolute; width: 22px; height: 22px; top:2px; left:2px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 10px 22px rgba(0,0,0,.35);
+      transition: transform var(--speed) var(--ease), background var(--speed) var(--ease);
+    }
+    .switch.on{
+      background: color-mix(in srgb, var(--accent1) 20%, rgba(255,255,255,.08));
+      border-color: color-mix(in srgb, var(--accent1) 35%, rgba(255,255,255,.16));
+    }
+    .switch.on::after{
+      transform: translateX(20px);
+      background: color-mix(in srgb, var(--accent1) 60%, rgba(255,255,255,.92));
+    }
+
+    /* Notifications (toast) */
+    .toastWrap{
+      position: fixed;
+      right: 18px;
+      top: 18px;
+      z-index: 12000;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      pointer-events:none;
+      max-width: min(420px, calc(100vw - 36px));
+    }
+    .toast{
+      pointer-events:auto;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      -webkit-backdrop-filter: blur(var(--blur)) saturate(var(--sat));
+      box-shadow: 0 28px 90px rgba(0,0,0,.55), 0 0 calc(72px * var(--glow)) color-mix(in srgb, var(--accent1) 14%, transparent);
+      overflow:hidden;
+      transform: translateY(-10px) scale(.98);
+      opacity: 0;
+      filter: blur(8px);
+      animation: toastIn 420ms var(--ease) forwards;
+    }
+    @keyframes toastIn{
+      to { opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    .toastInner{
+      display:flex;
+      align-items:flex-start;
+      gap: 10px;
+      padding: 12px 12px;
+    }
+    .tDot{
+      width: 10px; height: 10px; border-radius: 999px;
+      margin-top: 4px;
+      background: color-mix(in srgb, var(--accent1) 75%, white);
+      box-shadow: 0 0 calc(22px * var(--glow)) color-mix(in srgb, var(--accent1) 28%, transparent);
+      flex: 0 0 auto;
+    }
+    .tText{ min-width: 0; }
+    .tText strong{
+      display:block;
+      font-size: 12.5px;
+      letter-spacing:.2px;
+      margin-bottom: 2px;
+    }
+    .tText span{
+      display:block;
+      font-size: 12px;
+      color: rgba(255,255,255,.72);
+      line-height: 1.25;
+      word-wrap: break-word;
+    }
+    .tClose{
+      margin-left:auto;
+      width: 34px; height: 34px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.10);
+      color: rgba(255,255,255,.92);
+      cursor:pointer;
+      transition: transform var(--speed) var(--ease), border-color var(--speed) var(--ease), background var(--speed) var(--ease);
+      flex: 0 0 auto;
+    }
+    .tClose:hover{
+      transform: translateY(-1px) rotate(-4deg) scale(1.03);
+      border-color: color-mix(in srgb, var(--accent1) 38%, rgba(255,255,255,.14));
+      background: color-mix(in srgb, var(--accent1) 14%, rgba(0,0,0,.10));
+    }
+    .toast.out{
+      animation: toastOut 260ms var(--ease) forwards;
+    }
+    @keyframes toastOut{
+      to{ opacity:0; transform: translateY(-8px) scale(.98); filter: blur(8px); }
+    }
+
+    @media (max-width: 1100px){ .gridApps{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 900px){
+      .settingsBody{ grid-template-columns: 1fr; }
+      .themeGrid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 820px){
+      .topBar{ flex-direction:column; }
+      .searchCard{ width:100%; }
+      .gridApps{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px){
+      .gridApps{ grid-template-columns: 1fr; }
+      .drawer{ width: 86vw; }
+      .customGrid{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="grid"></div>
+  <div class="cursorGlow"></div>
+  <div class="grain"></div>
+  <canvas id="particles"></canvas>
+
+  <div class="toastWrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
+
+  <button class="hamburger" id="menuBtn" aria-label="Open menu" title="Menu">
+    <div class="lines" aria-hidden="true"><span></span><span></span><span></span></div>
+  </button>
+
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" aria-label="Sidebar">
+    <div class="drawerInner">
+      <div class="drawerTop">
+        <div class="brand">
+          <strong>AMETHYST</strong>
+          <span>apps</span>
+        </div>
+        <button class="close" id="closeBtn">Close</button>
+      </div>
+
+      <!-- NAV BAR (your updated version) -->
+      <div class="nav">
+        <div class="navItem" data-action="home">
+          <div class="navLeft"><span class="dot"></span> Home</div><div class="chev">›</div>
+        </div>
+        <div class="navItem" data-action="goto" data-href="g.html">
+          <div class="navLeft"><span class="dot"></span> Games</div><div class="chev">›</div>
+        </div>
+
+        <div class="navItem" data-action="goto" data-href="apps.html">
+          <div class="navLeft"><span class="dot"></span> Apps</div><div class="chev">›</div>
+        </div>
+
+        <div class="navItem" data-action="goto" data-href="music.html">
+          <div class="navLeft"><span class="dot"></span> Music</div><div class="chev">›</div>
+        </div>
+
+        <div class="navItem" data-action="settings">
+          <div class="navLeft"><span class="dot"></span> Settings</div><div class="chev">›</div>
+        </div>
+      </div>
+
+      <div class="drawerFoot">
+        Apps page • same vibe
+        <br/>Particles forced <b>OFF</b> here.
+      </div>
+    </div>
+  </aside>
+
+  <div class="wrap">
+    <div class="topBar" id="topBar">
+      <div class="titleCard" id="titleCard">
+        <div class="titleInner">
+          <strong>AMETHYST • Apps</strong>
+          <span>tools & stuff</span>
+        </div>
+      </div>
+
+      <div class="searchCard">
+        <div class="searchIcon">⌕</div>
+        <input id="search" class="searchInput" placeholder="Search apps..." autocomplete="off" />
+        <div class="countPill" id="countPill">0</div>
+      </div>
+    </div>
+
+    <div class="gridApps" id="gridApps"></div>
+  </div>
+
+  <!-- app window -->
+  <div class="overlay" id="overlay"></div>
+  <section class="window" id="window">
+    <div class="winInner">
+      <header class="winTop">
+        <div class="winTitle">
+          <strong id="winName">App</strong>
+          <span id="winPath">file</span>
+        </div>
+        <button class="xBtn" id="winClose" aria-label="Close">✕</button>
+      </header>
+
+      <div class="frameWrap">
+        <div class="frame" id="frameBox">
+          <iframe id="appFrame" src="about:blank" loading="lazy"></iframe>
+        </div>
+
+        <div class="controlsBar">
+          <button class="ctrlBtn" id="fsBtn">⛶ Fullscreen</button>
+          <button class="ctrlBtn secondary" id="backBtn">↩ Back</button>
+          <button class="ctrlBtn secondary" id="reloadBtn">↻ Reload</button>
+          <button class="ctrlBtn secondary" id="pauseBtn">⏸ Pause</button>
+          <div class="pauseBadge" id="pauseBadge" style="display:none;">Paused</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- settings -->
+  <div class="settingsScrim" id="settingsScrim"></div>
+  <section class="settingsWin" id="settingsWin" aria-label="Settings">
+    <div class="settingsInner">
+      <header class="settingsTop">
+        <div class="settingsTitle">
+          <strong>Amethyst Settings</strong>
+          <span>Themes!</span>
+        </div>
+        <button class="xBtn" id="settingsClose" aria-label="Close settings">✕</button>
+      </header>
+
+      <div class="settingsBody">
+        <div class="panel2 themesPanel">
+          <div class="themesHead">
+            <div>
+              <h3>Themes</h3>
+              <p>same themes across pages</p>
+            </div>
+            <p id="themeCount"></p>
+          </div>
+
+          <div class="themeGrid" id="themeGrid"></div>
+        </div>
+
+        <div class="panel2 controlsPanel">
+          <div class="controlRow">
+            <label>Glow <span id="glowVal">1.00</span></label>
+            <input id="glowRange" type="range" min="0.6" max="1.6" step="0.02" value="1">
+            <small>Borders + aura brighter</small>
+          </div>
+
+          <div class="controlRow">
+            <label>Motion <span id="motionVal">1.00</span></label>
+            <input id="motionRange" type="range" min="0" max="1" step="0.05" value="1">
+            <small>Tilt strength</small>
+          </div>
+
+          <div class="controlRow" style="gap:10px;">
+            <div class="customPanelTitle"><b>Make your own theme</b></div>
+
+            <div class="customGrid">
+              <div class="pick">
+                <label>Accent 1</label>
+                <input class="colorInput" id="cA1" type="color" value="#c88bff">
+              </div>
+              <div class="pick">
+                <label>Accent 2</label>
+                <input class="colorInput" id="cA2" type="color" value="#a86cff">
+              </div>
+
+              <div class="pick">
+                <label>Accent 3</label>
+                <input class="colorInput" id="cA3" type="color" value="#8c4cff">
+              </div>
+              <div class="pick">
+                <label>Gradient Angle</label>
+                <input id="gradAngle" type="range" min="0" max="360" step="1" value="180" />
+              </div>
+
+              <div class="pick">
+                <label>BG A</label>
+                <input class="colorInput" id="cBG1" type="color" value="#050112">
+              </div>
+              <div class="pick">
+                <label>BG B</label>
+                <input class="colorInput" id="cBG2" type="color" value="#08021b">
+              </div>
+
+              <div class="pick">
+                <label>BG C</label>
+                <input class="colorInput" id="cBG3" type="color" value="#120433">
+              </div>
+              <div class="pick">
+                <label>Particles Density</label>
+                <input id="pDensity" type="range" min="0" max="220" step="5" value="120" />
+              </div>
+            </div>
+
+            <div class="toggleRow" title="Particles are disabled on apps.html">
+              <span>Particles (Disabled)</span>
+              <div class="switch" id="pToggle" role="switch" aria-checked="false"></div>
+            </div>
+
+            <div class="btnRow" style="margin-top:0;">
+              <button class="btn2" id="saveCustomBtn">Save Custom</button>
+              <button class="btn2" id="useCustomBtn">Use Custom</button>
+            </div>
+
+            <div class="btnRow" style="margin-top:0;">
+              <button class="btn2" id="clearCustomBtn">Clear Custom</button>
+              <button class="btn2" id="randomCustomBtn">Randomize</button>
+            </div>
+          </div>
+
+          <div class="btnRow">
+            <button class="btn2" id="resetThemeBtn">Reset</button>
+            <button class="btn2" id="randomThemeBtn">Random</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const root = document.documentElement;
+
+    /* ===== Notifications (toast) ===== */
+    const toastWrap = document.getElementById("toastWrap");
+    function notify(title, msg, ms=2200){
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.innerHTML = `
+        <div class="toastInner">
+          <div class="tDot"></div>
+          <div class="tText">
+            <strong>${escapeHtml(title || "Notification")}</strong>
+            <span>${escapeHtml(msg || "")}</span>
+          </div>
+          <button class="tClose" aria-label="Dismiss">✕</button>
+        </div>
+      `;
+      const btn = t.querySelector(".tClose");
+      const kill = ()=>{
+        t.classList.add("out");
+        setTimeout(()=> t.remove(), 260);
+      };
+      btn.addEventListener("click", kill);
+      toastWrap.appendChild(t);
+      if (ms > 0) setTimeout(kill, ms);
+    }
+    function escapeHtml(s){
+      return String(s ?? "")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    /* ===== Cursor glow tracking ===== */
+    let raf = 0, nx = innerWidth/2, ny = innerHeight/2;
+    function schedule(){
+      if (raf) return;
+      raf = requestAnimationFrame(()=>{
+        raf = 0;
+        root.style.setProperty("--mx", nx + "px");
+        root.style.setProperty("--my", ny + "px");
+      });
+    }
+    addEventListener("mousemove", (e)=>{ nx=e.clientX; ny=e.clientY; schedule(); }, {passive:true});
+    addEventListener("touchmove", (e)=>{ nx=e.touches[0].clientX; ny=e.touches[0].clientY; schedule(); }, {passive:true});
+
+    /* ===== Drawer menu ===== */
+    const menuBtn = document.getElementById("menuBtn");
+    const scrim = document.getElementById("scrim");
+    const closeBtn = document.getElementById("closeBtn");
+    const drawer = document.getElementById("drawer");
+
+    function openMenu(){ document.body.classList.add("menuOpen"); }
+    function closeMenu(){ document.body.classList.remove("menuOpen"); }
+    function toggleMenu(){ document.body.classList.contains("menuOpen") ? closeMenu() : openMenu(); }
+
+    menuBtn.addEventListener("click", toggleMenu);
+    scrim.addEventListener("click", closeMenu);
+    closeBtn.addEventListener("click", closeMenu);
+
+    menuBtn.addEventListener("mouseenter", ()=> openMenu());
+    drawer.addEventListener("mouseleave", ()=> closeMenu());
+
+    /* ===== Settings open/close ===== */
+    const settingsScrim = document.getElementById("settingsScrim");
+    const settingsClose = document.getElementById("settingsClose");
+    function openSettings(){ document.body.classList.add("settingsOpen"); }
+    function closeSettings(){ document.body.classList.remove("settingsOpen"); }
+    settingsScrim.addEventListener("click", closeSettings);
+    settingsClose.addEventListener("click", closeSettings);
+
+    addEventListener("keydown", (e)=>{
+      if (e.key === "Escape"){
+        closeMenu();
+        closeSettings();
+        closePlay();
+      }
+    });
+
+    /* ===== Nav actions ===== */
+    document.querySelectorAll(".navItem").forEach(item=>{
+      item.addEventListener("click", ()=>{
+        const act = item.dataset.action;
+
+        if (act === "goto"){
+          const href = (item.dataset.href || "").trim();
+          if (!href) return;
+
+          if (/^https?:\/\//i.test(href)){
+            window.open(href, "_blank", "noopener,noreferrer");
+          } else {
+            window.location.href = href;
+          }
+        }
+
+        if (act === "home"){
+          // scroll apps list to top + pop title
+          const gridApps = document.getElementById("gridApps");
+          try{ gridApps.scrollTo({top:0, behavior:"smooth"}); }catch{ gridApps.scrollTop = 0; }
+          const t = document.getElementById("titleCard");
+          if (t){
+            t.animate(
+              [{transform:"translateY(0) scale(1)"},{transform:"translateY(-6px) scale(1.02)"},{transform:"translateY(0) scale(1)"}],
+              {duration: 280, easing:"cubic-bezier(.18,.98,.22,1)"}
+            );
+          }
+          notify("Home", "Scrolled to top.");
+        }
+
+        if (act === "settings"){ openSettings(); }
+
+        closeMenu();
+      });
+    });
+
+    /* ===== Themes (synced across pages) ===== */
+    const THEMES = [
+      { id:"amethyst", name:"Amethyst",     bgA:"#050112", bgB:"#08021b", bgC:"#120433", a1:"#c88bff", a2:"#a86cff", a3:"#8c4cff", angle:180 },
+      { id:"prism",   name:"Prism Bloom",  bgA:"#03010b", bgB:"#07021a", bgC:"#14003b", a1:"#ff78ff", a2:"#6bdbff", a3:"#a8ff6b", angle:200 },
+      { id:"nebula",  name:"Nebula",       bgA:"#040014", bgB:"#0a0430", bgC:"#1b0654", a1:"#b58cff", a2:"#67b7ff", a3:"#ff70e6", angle:180 },
+      { id:"violet",  name:"Violet Glass", bgA:"#040012", bgB:"#090222", bgC:"#15043a", a1:"#d1a2ff", a2:"#9b7cff", a3:"#6ee7ff", angle:190 },
+      { id:"miku",    name:"Miku Neon",    bgA:"#021014", bgB:"#02202a", bgC:"#021a2f", a1:"#2dffdd", a2:"#00c6ff", a3:"#a86cff", angle:180 },
+      { id:"galaxy",  name:"Galaxy",       bgA:"#040014", bgB:"#0a0435", bgC:"#020717", a1:"#a86cff", a2:"#5bd0ff", a3:"#ff7adf", angle:180 },
+      { id:"ruby",    name:"Ruby Glow",    bgA:"#120005", bgB:"#24000c", bgC:"#070012", a1:"#ff4d8d", a2:"#ff7a5c", a3:"#c88bff", angle:180 },
+      { id:"aurora",  name:"Aurora",       bgA:"#001013", bgB:"#001a22", bgC:"#070018", a1:"#00ffa3", a2:"#00c6ff", a3:"#c88bff", angle:180 },
+      { id:"ice",     name:"Ice Prism",    bgA:"#010912", bgB:"#041426", bgC:"#020010", a1:"#7be7ff", a2:"#b58cff", a3:"#ffffff", angle:180 },
+      { id:"gold",    name:"Gold Lux",     bgA:"#0c0700", bgB:"#160c00", bgC:"#0a0012", a1:"#ffd36a", a2:"#ff9a3d", a3:"#c88bff", angle:180 },
+      { id:"toxic",   name:"Toxic Pop",    bgA:"#020b06", bgB:"#03110b", bgC:"#100038", a1:"#b6ff3b", a2:"#00ffa3", a3:"#ff78ff", angle:180 },
+      { id:"mono",    name:"Mono Glass",   bgA:"#05060a", bgB:"#0a0c12", bgC:"#02030a", a1:"#e8e8ff", a2:"#b9c4ff", a3:"#8c4cff", angle:180 },
+      { id:"rose",    name:"Rose Prism",   bgA:"#090012", bgB:"#180024", bgC:"#040012", a1:"#ff6bcb", a2:"#c88bff", a3:"#6bdbff", angle:180 },
+      { id:"mint",    name:"Mint Glass",   bgA:"#001214", bgB:"#00242a", bgC:"#040012", a1:"#7affd8", a2:"#6bdbff", a3:"#c88bff", angle:180 }
+    ];
+
+    const themeGrid = document.getElementById("themeGrid");
+    const themeCount = document.getElementById("themeCount");
+
+    function setSelected(id){
+      document.querySelectorAll(".themeCard").forEach(c=>{
+        c.dataset.selected = (c.dataset.id === id) ? "1" : "0";
+      });
+    }
+
+    function applyThemeVars(t, quiet=false){
+      root.style.setProperty("--bgA", t.bgA);
+      root.style.setProperty("--bgB", t.bgB);
+      root.style.setProperty("--bgC", t.bgC);
+      root.style.setProperty("--bgAngle", (t.angle ?? 180) + "deg");
+      root.style.setProperty("--accent1", t.a1);
+      root.style.setProperty("--accent2", t.a2);
+      root.style.setProperty("--accent3", t.a3);
+      localStorage.setItem("amethyst_theme", t.id);
+      setSelected(t.id);
+      if (!quiet) notify("Theme", `Set to ${t.name}`);
+    }
+
+    function applyCustomTheme(obj){
+      if (!obj) return;
+      root.style.setProperty("--bgA", obj.bgA);
+      root.style.setProperty("--bgB", obj.bgB);
+      root.style.setProperty("--bgC", obj.bgC);
+      root.style.setProperty("--bgAngle", (obj.angle ?? 180) + "deg");
+      root.style.setProperty("--accent1", obj.a1);
+      root.style.setProperty("--accent2", obj.a2);
+      root.style.setProperty("--accent3", obj.a3);
+    }
+
+    function loadSyncedTheme(){
+      const glow = localStorage.getItem("amethyst_glow") || "1";
+      const motion = localStorage.getItem("amethyst_motion") || "1";
+      root.style.setProperty("--glow", glow);
+      root.style.setProperty("--motion", motion);
+
+      const mode = localStorage.getItem("amethyst_theme") || "amethyst";
+      if (mode === "custom"){
+        const raw = localStorage.getItem("amethyst_custom_theme");
+        if (raw){
+          try{ applyCustomTheme(JSON.parse(raw)); }catch{}
+        }
+        setSelected("__none__");
+        return;
+      }
+      const t = THEMES.find(x=>x.id===mode) || THEMES[0];
+      applyThemeVars(t, true);
+    }
+
+    function renderThemes(){
+      themeGrid.innerHTML = "";
+      THEMES.forEach((t)=>{
+        const card = document.createElement("div");
+        card.className = "themeCard";
+        card.dataset.id = t.id;
+        card.style.setProperty("--tA", t.a1 + "66");
+        card.style.setProperty("--tB", t.a2 + "55");
+        card.style.setProperty("--tC", t.a3 + "55");
+        card.innerHTML = `
+          <div class="themeMeta">
+            <strong>${escapeHtml(t.name)}<span class="selectedPill">Selected</span></strong>
+            <span>${escapeHtml(t.id)}</span>
+          </div>
+        `;
+        card.addEventListener("click", ()=> applyThemeVars(t));
+        card.addEventListener("mousemove", (e)=>{
+          const r = card.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width;
+          const y = (e.clientY - r.top) / r.height;
+          const mx = (x - 0.5) * 2;
+          const my = (y - 0.5) * 2;
+          const motion = parseFloat(getComputedStyle(root).getPropertyValue("--motion")) || 1;
+          const rx = (-my * 10) * motion;
+          const ry = ( mx * 12) * motion;
+          const rz = (-mx * 3) * motion;
+          card.style.transform = `translateY(-8px) scale(1.05) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)`;
+        }, {passive:true});
+        card.addEventListener("mouseleave", ()=>{ card.style.transform=""; });
+        themeGrid.appendChild(card);
+      });
+      themeCount.textContent = `${THEMES.length} themes`;
+      setSelected(localStorage.getItem("amethyst_theme") || "amethyst");
+    }
+
+    /* ===== Glow/Motion controls ===== */
+    const glowRange = document.getElementById("glowRange");
+    const motionRange = document.getElementById("motionRange");
+    const glowVal = document.getElementById("glowVal");
+    const motionVal = document.getElementById("motionVal");
+
+    function setGlow(v){
+      root.style.setProperty("--glow", v);
+      glowVal.textContent = (+v).toFixed(2);
+      localStorage.setItem("amethyst_glow", v);
+    }
+    function setMotion(v){
+      root.style.setProperty("--motion", v);
+      motionVal.textContent = (+v).toFixed(2);
+      localStorage.setItem("amethyst_motion", v);
+    }
+    function loadControls(){
+      const g = localStorage.getItem("amethyst_glow") || "1";
+      const m = localStorage.getItem("amethyst_motion") || "1";
+      glowRange.value = g; motionRange.value = m;
+      setGlow(g); setMotion(m);
+    }
+    glowRange.addEventListener("input", e=> setGlow(e.target.value));
+    motionRange.addEventListener("input", e=> setMotion(e.target.value));
+
+    document.getElementById("resetThemeBtn").addEventListener("click", ()=>{
+      localStorage.removeItem("amethyst_theme");
+      localStorage.removeItem("amethyst_glow");
+      localStorage.removeItem("amethyst_motion");
+      localStorage.removeItem("amethyst_custom_theme");
+      localStorage.removeItem("amethyst_grad_angle");
+      // particles forced off anyway
+      localStorage.setItem("amethyst_particles", "0");
+      localStorage.removeItem("amethyst_particles_density");
+      loadControls();
+      loadSyncedTheme();
+      setSelected(localStorage.getItem("amethyst_theme") || "amethyst");
+      notify("Reset", "Theme settings reset.");
+    });
+
+    document.getElementById("randomThemeBtn").addEventListener("click", ()=>{
+      const t = THEMES[Math.floor(Math.random()*THEMES.length)];
+      applyThemeVars(t);
+    });
+
+    /* ===== Custom Theme Builder ===== */
+    const CUSTOM_KEY = "amethyst_custom_theme";
+
+    const cA1 = document.getElementById("cA1");
+    const cA2 = document.getElementById("cA2");
+    const cA3 = document.getElementById("cA3");
+    const cBG1 = document.getElementById("cBG1");
+    const cBG2 = document.getElementById("cBG2");
+    const cBG3 = document.getElementById("cBG3");
+    const gradAngle = document.getElementById("gradAngle");
+    const pDensity = document.getElementById("pDensity");
+    const pToggle = document.getElementById("pToggle"); // disabled UI
+
+    const saveCustomBtn = document.getElementById("saveCustomBtn");
+    const useCustomBtn = document.getElementById("useCustomBtn");
+    const clearCustomBtn = document.getElementById("clearCustomBtn");
+    const randomCustomBtn = document.getElementById("randomCustomBtn");
+
+    function getCustomFromInputs(){
+      return {
+        bgA: cBG1.value,
+        bgB: cBG2.value,
+        bgC: cBG3.value,
+        a1: cA1.value,
+        a2: cA2.value,
+        a3: cA3.value,
+        angle: +gradAngle.value || 180
+      };
+    }
+
+    function loadCustomToInputs(){
+      const raw = localStorage.getItem(CUSTOM_KEY);
+      if (!raw) return;
+      try{
+        const obj = JSON.parse(raw);
+        cBG1.value = obj.bgA || cBG1.value;
+        cBG2.value = obj.bgB || cBG2.value;
+        cBG3.value = obj.bgC || cBG3.value;
+        cA1.value = obj.a1 || cA1.value;
+        cA2.value = obj.a2 || cA2.value;
+        cA3.value = obj.a3 || cA3.value;
+        gradAngle.value = (obj.angle ?? 180);
+      }catch{}
+    }
+
+    function livePreview(){
+      applyCustomTheme(getCustomFromInputs());
+      localStorage.setItem("amethyst_theme", "custom");
+      setSelected("__none__");
+    }
+
+    [cA1,cA2,cA3,cBG1,cBG2,cBG3].forEach(inp=>{
+      inp.addEventListener("input", livePreview, {passive:true});
+    });
+    gradAngle.addEventListener("input", livePreview, {passive:true});
+
+    saveCustomBtn.addEventListener("click", ()=>{
+      const obj = getCustomFromInputs();
+      localStorage.setItem(CUSTOM_KEY, JSON.stringify(obj));
+      saveCustomBtn.animate([{transform:"scale(1)"},{transform:"scale(1.06) rotate(-1deg)"},{transform:"scale(1)"}],{duration:260,easing:"cubic-bezier(.18,.98,.22,1)"});
+      notify("Saved", "Custom theme saved.");
+    });
+
+    useCustomBtn.addEventListener("click", ()=>{
+      const raw = localStorage.getItem(CUSTOM_KEY);
+      if (!raw) return notify("No custom", "Save a custom theme first.", 2400);
+      try{
+        const obj = JSON.parse(raw);
+        applyCustomTheme(obj);
+        localStorage.setItem("amethyst_theme", "custom");
+        setSelected("__none__");
+        notify("Theme", "Using custom theme.");
+      }catch{
+        notify("Error", "Could not load custom theme.", 2400);
+      }
+    });
+
+    clearCustomBtn.addEventListener("click", ()=>{
+      localStorage.removeItem(CUSTOM_KEY);
+      clearCustomBtn.animate([{transform:"scale(1)"},{transform:"scale(1.06) rotate(-2deg)"},{transform:"scale(1)"}],{duration:260,easing:"cubic-bezier(.18,.98,.22,1)"});
+      notify("Cleared", "Custom theme cleared.");
+    });
+
+    function randHex(){ return "#"+Math.floor(Math.random()*0xFFFFFF).toString(16).padStart(6,"0"); }
+    function darkHex(){
+      const v = Math.floor(Math.random()*0x0FFFFF).toString(16).padStart(6,"0");
+      return "#0" + v.slice(1);
+    }
+    randomCustomBtn.addEventListener("click", ()=>{
+      cA1.value = randHex(); cA2.value = randHex(); cA3.value = randHex();
+      cBG1.value = darkHex(); cBG2.value = darkHex(); cBG3.value = darkHex();
+      gradAngle.value = Math.floor(Math.random()*361);
+      livePreview();
+      notify("Random", "Custom colors randomized.");
+    });
+
+    /* ===== Particles forced OFF (per your request) ===== */
+    const PARTICLE_KEY = "amethyst_particles";
+    const canvas = document.getElementById("particles");
+    function forceParticlesOff(){
+      localStorage.setItem(PARTICLE_KEY, "0");
+      canvas.style.display = "none";
+      pToggle.classList.remove("on");
+      pToggle.setAttribute("aria-checked","false");
+      // keep density slider but it won't do anything on this page
+    }
+
+    /* ===== Apps list ===== */
+    const APPS = [
+      { name:"Code Editor", desc:"TOOLS", file:"code.html", img:"code.png" }
+      // add more later like:
+      // { name:"Calculator", desc:"UTILITY", file:"calc.html", img:"calc.png" },
+    ];
+
+    const grid = document.getElementById("gridApps");
+    const search = document.getElementById("search");
+    const countPill = document.getElementById("countPill");
+
+    function render(list){
+      grid.innerHTML = "";
+      list.forEach((a, i)=>{
+        const card = document.createElement("div");
+        card.className = "appCard";
+        card.style.setProperty("--d", i);
+
+        const safeImg = a.img || "";
+        const imgSrc = safeImg ? encodeURI(safeImg) : "";
+
+        card.innerHTML = `
+          <div class="appTop">
+            <div class="thumb">${imgSrc ? `<img src="${imgSrc}" alt="">` : ""}</div>
+            <div class="openPill">Open</div>
+          </div>
+          <div class="appBottom">
+            <strong>${escapeHtml(a.name)}</strong>
+            <span>${escapeHtml((a.desc && a.desc.trim()) ? a.desc : "Click to open")}</span>
+          </div>
+        `;
+
+        card.addEventListener("mousemove", (e)=>{
+          const r = card.getBoundingClientRect();
+          const x = (e.clientX - r.left) / r.width;
+          const y = (e.clientY - r.top) / r.height;
+          const mx = (x - 0.5) * 2;
+          const my = (y - 0.5) * 2;
+          const motion = parseFloat(getComputedStyle(root).getPropertyValue("--motion")) || 1;
+          const rx = (-my * 10) * motion;
+          const ry = ( mx * 12) * motion;
+          const rz = (-mx * 3) * motion;
+          card.style.transform = `perspective(1000px) translateY(-12px) scale(1.08) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)`;
+        }, {passive:true});
+        card.addEventListener("mouseleave", ()=>{ card.style.transform = ""; });
+
+        card.addEventListener("click", (ev)=>{
+          burst(ev.clientX, ev.clientY, 18);
+          openPlay(a);
+        });
+
+        grid.appendChild(card);
+      });
+
+      countPill.textContent = String(list.length);
+    }
+
+    window.__APPS = APPS.slice();
+
+    search.addEventListener("input", ()=>{
+      const base = window.__APPS || APPS;
+      const q = search.value.trim().toLowerCase();
+      const filtered = !q ? base : base.filter(a =>
+        (a.name||"").toLowerCase().includes(q) ||
+        (a.desc||"").toLowerCase().includes(q) ||
+        (a.file||"").toLowerCase().includes(q)
+      );
+      render(filtered);
+    });
+
+    /* ===== Window controls ===== */
+    const overlay = document.getElementById("overlay");
+    const winClose = document.getElementById("winClose");
+    const winName = document.getElementById("winName");
+    const winPath = document.getElementById("winPath");
+    const frame = document.getElementById("appFrame");
+    const frameBox = document.getElementById("frameBox");
+
+    const fsBtn = document.getElementById("fsBtn");
+    const backBtn = document.getElementById("backBtn");
+    const reloadBtn = document.getElementById("reloadBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    const pauseBadge = document.getElementById("pauseBadge");
+
+    let currentApp = null;
+    let paused = false;
+    let frameCover = null;
+
+    function ensureCover(){
+      if (frameCover) return;
+      frameCover = document.createElement("div");
+      frameCover.style.position = "absolute";
+      frameCover.style.inset = "0";
+      frameCover.style.display = "none";
+      frameCover.style.alignItems = "center";
+      frameCover.style.justifyContent = "center";
+      frameCover.style.background = "rgba(0,0,0,.55)";
+      frameCover.style.backdropFilter = "blur(10px) saturate(160%)";
+      frameCover.style.webkitBackdropFilter = "blur(10px) saturate(160%)";
+      frameCover.style.zIndex = "5";
+      frameCover.style.borderRadius = "20px";
+      frameCover.style.border = "1px solid rgba(255,255,255,.12)";
+      frameCover.innerHTML = `
+        <div style="
+          padding:14px 16px;
+          border-radius:18px;
+          border:1px solid rgba(255,255,255,.14);
+          background:rgba(255,255,255,.08);
+          box-shadow:0 22px 70px rgba(0,0,0,.45);
+          color:rgba(255,255,255,.9);
+          font-size:13px;
+          display:flex;
+          align-items:center;
+          gap:10px;
+        ">
+          <span style="
+            width:10px;height:10px;border-radius:999px;
+            background:color-mix(in srgb, var(--accent1) 80%, white);
+            box-shadow:0 0 calc(22px * var(--glow)) color-mix(in srgb, var(--accent1) 30%, transparent);
+          "></span>
+          Paused
+        </div>
+      `;
+      frameBox.appendChild(frameCover);
+    }
+
+    function openPlay(a){
+      currentApp = a;
+      paused = false;
+      pauseBadge.style.display = "none";
+      ensureCover();
+      frameCover.style.display = "none";
+
+      winName.textContent = a.name || "App";
+      winPath.textContent = a.file || "";
+
+      const file = (a.file || "about:blank");
+      frame.src = (file === "about:blank") ? file : encodeURI(file);
+
+      document.body.classList.add("playOpen");
+      notify("Opening", a.name || "App");
+    }
+
+    function closePlay(){
+      document.body.classList.remove("playOpen");
+      frame.src = "about:blank";
+      currentApp = null;
+      paused = false;
+      if (frameCover) frameCover.style.display = "none";
+      pauseBadge.style.display = "none";
+      pauseBtn.textContent = "⏸ Pause";
+      try{ if (document.fullscreenElement) document.exitFullscreen(); }catch{}
+    }
+
+    overlay.addEventListener("click", closePlay);
+    winClose.addEventListener("click", closePlay);
+
+    fsBtn.addEventListener("click", async ()=>{
+      try{
+        if (!document.fullscreenElement){
+          await frameBox.requestFullscreen();
+          notify("Fullscreen", "Enabled");
+        }else{
+          await document.exitFullscreen();
+          notify("Fullscreen", "Exited");
+        }
+      }catch{}
+    });
+
+    backBtn.addEventListener("click", ()=>{
+      try{
+        const w = frame.contentWindow;
+        if (w && w.history && w.history.length > 1){
+          w.history.back();
+          notify("Back", "Went back in app.");
+        }else if (currentApp?.file){
+          frame.src = encodeURI(currentApp.file);
+          notify("Back", "Reloaded app start.");
+        }
+      }catch{
+        if (currentApp?.file) frame.src = encodeURI(currentApp.file);
+      }
+    });
+
+    reloadBtn.addEventListener("click", ()=>{
+      try{
+        const src = frame.src;
+        frame.src = "about:blank";
+        setTimeout(()=> frame.src = src, 30);
+        notify("Reload", "App reloaded.");
+      }catch{}
+    });
+
+    pauseBtn.addEventListener("click", ()=>{
+      ensureCover();
+      paused = !paused;
+      frameCover.style.display = paused ? "flex" : "none";
+      pauseBadge.style.display = paused ? "inline-flex" : "none";
+      pauseBtn.textContent = paused ? "▶ Resume" : "⏸ Pause";
+      notify(paused ? "Paused" : "Resumed", paused ? "Interaction blocked." : "Back to normal.");
+    });
+
+    /* ===== explode burst ===== */
+    function burst(x, y, n=16){
+      for(let i=0;i<n;i++){
+        const d = document.createElement("div");
+        d.className = "burstDot";
+        d.style.left = (x - 4) + "px";
+        d.style.top  = (y - 4) + "px";
+
+        const a1 = getComputedStyle(root).getPropertyValue("--accent1").trim();
+        const a2 = getComputedStyle(root).getPropertyValue("--accent2").trim();
+        const a3 = getComputedStyle(root).getPropertyValue("--accent3").trim();
+        const colors = [a1,a2,a3,"rgba(255,255,255,.95)"];
+        d.style.background = colors[Math.floor(Math.random()*colors.length)] || "rgba(255,255,255,.92)";
+
+        document.body.appendChild(d);
+
+        const ang = Math.random()*Math.PI*2;
+        const dist = 60 + Math.random()*90;
+        const dx = Math.cos(ang)*dist;
+        const dy = Math.sin(ang)*dist;
+        const rot = (Math.random()*220 - 110);
+
+        d.animate([
+          { transform:`translate(0,0) scale(1) rotate(0deg)`, opacity: 1 },
+          { transform:`translate(${dx}px,${dy}px) scale(${0.6 + Math.random()*0.7}) rotate(${rot}deg)`, opacity: 0 }
+        ], { duration: 520 + Math.random()*240, easing:"cubic-bezier(.18,.98,.22,1)" });
+
+        setTimeout(()=> d.remove(), 900);
+      }
+    }
+
+    addEventListener("storage", (e)=>{
+      if ([
+        "amethyst_theme","amethyst_custom_theme","amethyst_glow","amethyst_motion"
+      ].includes(e.key)){
+        loadSyncedTheme();
+        setSelected(localStorage.getItem("amethyst_theme") || "amethyst");
+      }
+    });
+
+    (function init(){
+      loadControls();
+      renderThemes();
+      loadCustomToInputs();
+      loadSyncedTheme();
+
+      forceParticlesOff(); // <- your request
+
+      render(window.__APPS);
+      countPill.textContent = String(window.__APPS.length);
+      pauseBtn.textContent = "⏸ Pause";
+
+      // tiny “notification” so you know it’s working (only once per browser)
+      if (!localStorage.getItem("amethyst_apps_hint")){
+        localStorage.setItem("amethyst_apps_hint","1");
+        notify("Apps", "Apps page ready. Particles are off.", 2600);
+      }
+    })();
+  </script>
+</body>
+</html>
