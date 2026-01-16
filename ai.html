@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Network Unity AI</title>
+
+  <meta name="description" content="Network Unity AI — clean, fast, connected." />
+  <meta name="theme-color" content="#000000" />
+  <meta property="og:title" content="Network Unity AI" />
+  <meta property="og:image" content="logo.png" />
+
+  <link rel="icon" type="image/png" href="logo.png" />
+
+  <!-- Keep your same AI asset files -->
+  <link rel="stylesheet" href="./ai/assets/css/index.css" />
+  <link rel="stylesheet" href="./ai/assets/css/toast.css" />
+
+  <!-- Icons / code highlight (kept) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/themes/prism-tomorrow.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/vs2015.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+
+  <!-- Nova Cut -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nova+Cut&display=swap" rel="stylesheet" />
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#000;
+      --glass:rgba(255,255,255,.06);
+      --glass2:rgba(255,255,255,.09);
+      --stroke:rgba(255,255,255,.16);
+      --stroke2:rgba(255,255,255,.22);
+      --text:#fff;
+      --muted:rgba(255,255,255,.65);
+      --shadow:0 28px 90px rgba(0,0,0,.85);
+      --r:22px;
+      --pill:999px;
+      --font:"Nova Cut", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    body{
+      background: #000;
+      color: var(--text);
+      min-height:100vh;
+      overflow:hidden;
+      font-family: var(--font);
+    }
+
+    /* background particles canvas */
+    canvas#particles{
+      position:fixed;
+      inset:0;
+      z-index:0;
+    }
+
+    /* soft glow following cursor */
+    #nuGlow{
+      position:fixed;
+      width:520px;height:520px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(255,255,255,.12), transparent 62%);
+      filter:blur(70px);
+      pointer-events:none;
+      transform:translate(-50%,-50%);
+      z-index:1;
+      opacity:.9;
+    }
+
+    /* center shell */
+    .wrap{
+      position:relative;
+      z-index:2;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:90px 18px 130px;
+    }
+
+    /* AI card */
+    .chat-container{
+      width:min(980px, 96vw) !important;
+      height:min(80vh, 860px) !important;
+      max-width:none !important;
+      max-height:none !important;
+
+      background:var(--glass) !important;
+      border:1px solid var(--stroke) !important;
+      border-radius:var(--r) !important;
+      backdrop-filter:blur(22px) !important;
+
+      box-shadow: var(--shadow),
+                  inset 0 0 0 1px rgba(255,255,255,.04),
+                  inset 0 0 80px rgba(255,255,255,.05) !important;
+
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+
+    /* header area (clean, no heavy gradient) */
+    .chat-header{
+      background:rgba(255,255,255,.06) !important;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      font-family:var(--font) !important;
+      text-shadow:0 0 16px rgba(255,255,255,.18);
+    }
+
+    /* branding block */
+    .branding{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:14px 16px 12px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.03);
+    }
+    .branding img{
+      width:44px;height:44px;
+      border-radius:14px;
+      object-fit:cover;
+      filter:drop-shadow(0 0 18px rgba(255,255,255,.18));
+    }
+    .branding div{
+      font-family:var(--font) !important;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      font-size:.92rem;
+      color:#fff;
+    }
+
+    /* options strip */
+    .chat-options{
+      background:rgba(255,255,255,.02);
+      border-bottom:1px solid rgba(255,255,255,.07);
+    }
+    .selector, .selector-selected, .selector-options{
+      font-family:var(--font) !important;
+      letter-spacing:.12em;
+    }
+
+    /* chat body */
+    .chat-body{
+      flex:1;
+      padding:18px 18px !important;
+      overflow:auto;
+      scrollbar-width:thin;
+      scrollbar-color:rgba(255,255,255,.25) transparent;
+    }
+    .chat-body::-webkit-scrollbar{width:10px}
+    .chat-body::-webkit-scrollbar-thumb{
+      background:rgba(255,255,255,.18);
+      border-radius:999px;
+      border:2px solid transparent;
+      background-clip:content-box;
+    }
+
+    /* messages */
+    .chat-body .message{
+      border-radius:18px !important;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.05);
+    }
+    .chat-body .message.ai{
+      background:rgba(255,255,255,.06);
+      border-color:rgba(255,255,255,.14);
+      box-shadow:0 0 22px rgba(255,255,255,.10);
+    }
+
+    /* thinking */
+    #aiThinking{
+      display:none;
+      opacity:.7;
+      font-size:13px;
+      margin:10px 0;
+      color:rgba(255,255,255,.72);
+      animation:thinkPulse 1.4s infinite ease-in-out;
+      font-family:var(--font) !important;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+    }
+    @keyframes thinkPulse{
+      0%{opacity:.35}
+      50%{opacity:1}
+      100%{opacity:.35}
+    }
+
+    /* input */
+    .chat-input{
+      padding:12px 12px;
+      border-top:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+    }
+    .chat-input input{
+      font-family:var(--font) !important;
+      letter-spacing:.10em;
+      background:rgba(255,255,255,.06) !important;
+      color:#fff !important;
+      border:1px solid rgba(255,255,255,.18) !important;
+      border-radius:18px !important;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+    }
+    .chat-input input::placeholder{
+      color:rgba(255,255,255,.45) !important;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+    }
+    #sendMsg{
+      background:rgba(255,255,255,.12) !important;
+      border:1px solid rgba(255,255,255,.18) !important;
+      box-shadow:0 0 18px rgba(255,255,255,.10);
+    }
+    #sendMsg:hover{
+      background:rgba(255,255,255,.18) !important;
+    }
+
+    /* bottom nav (Network Unity) */
+    .nav{
+      position:fixed;
+      bottom:26px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:10;
+      display:flex;
+      gap:20px;
+      padding:14px 22px;
+      background:rgba(255,255,255,.08);
+      backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:26px;
+    }
+    .nav a{
+      width:46px;
+      height:46px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:.25s ease;
+    }
+    .nav a:hover{
+      transform:translateY(-6px) scale(1.1);
+      box-shadow:0 0 18px rgba(255,255,255,.25);
+    }
+    .nav svg{
+      width:22px;height:22px;fill:#fff;
+    }
+    .nav .active{
+      box-shadow:0 0 20px rgba(255,255,255,.42);
+      background:rgba(255,255,255,.06);
+    }
+
+    /* responsive */
+    @media (max-width:640px){
+      .chat-container{height:84vh !important;}
+      .branding{gap:10px}
+      .branding img{width:38px;height:38px;border-radius:12px}
+      .branding div{font-size:.85rem}
+      .nav{gap:14px;padding:12px 16px}
+      .nav a{width:44px;height:44px}
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="particles"></canvas>
+  <div id="nuGlow"></div>
+
+  <!-- keep same JS files -->
+  <script src="./ai/assets/js/index.js" defer></script>
+  <script src="./ai/assets/js/load.js" defer></script>
+
+  <div class="wrap">
+    <div class="chat-container">
+      <div class="chat-header">
+        Network Unity AI <span class="version"><i class="fas fa-robot"></i> beta</span>
+      </div>
+
+      <div class="branding">
+        <img src="logo.png" alt="Network Unity Logo">
+        <div>Network Unity AI</div>
+      </div>
+
+      <div class="chat-options">
+        <div class="option">
+          <div class="selector" id="modelSelector">
+            <div class="selector-selected">Llama 3.1 8B Instant</div>
+            <div class="selector-options">
+              <div data-value="llama-3.1-8b-instant">Llama 3.1 8B Instant</div>
+              <div data-value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile</div>
+              <div data-value="deepseek-r1-distill-llama-70b">Deepseek R1 Distill Llama 70B</div>
+              <div data-value="gemma2-9b-it">Gemma2 9B IT</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-body" id="chatBody">
+        <div id="aiThinking">✦ Network Unity is thinking…</div>
+      </div>
+
+      <div class="chat-input">
+        <input type="text" id="aiInput" placeholder="Ask Network Unity..." autocomplete="off">
+        <input type="file" id="imageUpload" accept="image/*" style="display:none;">
+        <button id="sendMsg" title="Send"><i class="fas fa-arrow-up"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="index.html" title="Home">
+      <svg viewBox="0 0 24 24"><path d="M12 3l9 8h-3v9h-12v-9h-3z"/></svg>
+    </a>
+
+    <a href="games.html" title="Games">
+      <svg viewBox="0 0 24 24">
+        <path d="M7 10h10a4 4 0 0 1 4 4v2a3 3 0 0 1-3 3h-1l-2-2h-6l-2 2h-1a3 3 0 0 1-3-3v-2a4 4 0 0 1 4-4z"/>
+        <rect x="8" y="12" width="2" height="2"/>
+        <rect x="6" y="14" width="2" height="2"/>
+        <circle cx="15.5" cy="13.5" r="1"/>
+        <circle cx="17.5" cy="15.5" r="1"/>
+      </svg>
+    </a>
+
+    <a href="apps.html" title="Apps">
+      <svg viewBox="0 0 24 24"><path d="M4 4h6v6h-6zM14 4h6v6h-6zM4 14h6v6h-6zM14 14h6v6h-6z"/></svg>
+    </a>
+
+    <a href="videos.html" title="Videos / Movies">
+      <svg viewBox="0 0 24 24"><path d="M4 6h14v12h-14z"/><path d="M18 8l4 2v4l-4 2z"/></svg>
+    </a>
+
+    <a href="ai.html" title="AI" class="active">
+      <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7v4a6 6 0 0 0 6 6h2a6 6 0 0 0 6-6V9a7 7 0 0 0-7-7zm-4 9h2v2H8v-2zm6 0h2v2h-2v-2zM9 16h6v2H9v-2z"/></svg>
+    </a>
+
+    <a href="settings.html" title="Settings">
+      <svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8z"/><path d="M2 12h2m16 0h2M12 2v2m0 16v2"/></svg>
+    </a>
+  </nav>
+
+  <script>
+    /* cursor glow */
+    const glow = document.getElementById("nuGlow");
+    window.addEventListener("mousemove", (e) => {
+      glow.style.left = e.clientX + "px";
+      glow.style.top  = e.clientY + "px";
+    });
+
+    /* particles */
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d");
+    let w,h;
+    function resize(){
+      w = canvas.width = innerWidth;
+      h = canvas.height = innerHeight;
+    }
+    addEventListener("resize", resize);
+    resize();
+
+    const pts = [...Array(90)].map(() => ({
+      x: Math.random()*w,
+      y: Math.random()*h,
+      r: Math.random()*1.5 + 0.4,
+      vx: (Math.random()-0.5)*0.30,
+      vy: (Math.random()-0.5)*0.30
+    }));
+
+    (function loop(){
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle = "rgba(255,255,255,.82)";
+      for(const p of pts){
+        p.x += p.vx; p.y += p.vy;
+        if(p.x < 0 || p.x > w) p.vx *= -1;
+        if(p.y < 0 || p.y > h) p.vy *= -1;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+        ctx.fill();
+      }
+      requestAnimationFrame(loop);
+    })();
+
+    /* keep compatibility with your asset JS hooks */
+    function showThinking(){
+      const el = document.getElementById("aiThinking");
+      if (el) el.style.display = "block";
+    }
+    function hideThinking(){
+      const el = document.getElementById("aiThinking");
+      if (el) el.style.display = "none";
+    }
+  </script>
+</body>
+</html>
